@@ -9,34 +9,33 @@ public class AccountsUseCase_NoService : IAccountsUseCase_NoService
         _repoBank = repoBank;
         _repoUser = repoUser;
     }
-    public async Task<bool> CreateAccount(Guid id, CreateAccountRequest request)
+    public async Task<bool> CreateAccount(Guid idUser, CreateAccountRequest request)
     {
-        var verifyUserExists = await _repoUser.VerifyExistsUser_withID(id);
+        var verifyUserExists = await _repoUser.VerifyExistsUser(idUser);
         if (!verifyUserExists)
             throw new UseCaseException("Usuario não existe.");
         Accounts Data = new Accounts
         {
             ID = Guid.NewGuid(),
-            UserID = id,
+            UserID = idUser,
             Status = OptionsStatus.ATIVO,
             Saldo = 0
 
         };
-        Data.Validate_TipoDaConta(request.TipoDaConta);
 
         var result = await _repoBank.CreateAccount(Data);
         return result;
     }
-    public async Task<string> GetSaldo(Guid id)
+    public async Task<string> GetSaldo(Guid id_Conta)
     {
-        var verifyUserExists = await _repoUser.VerifyExistsUser_withID(id);
+        var verifyUserExists = await _repoUser.VerifyExistsUser(id_Conta);
         if (!verifyUserExists)
             throw new UseCaseException("Usuario não existe.");
-        return await _repoBank.GetSaldo(id);
+        return await _repoBank.GetSaldo(id_Conta);
     }
     public async Task<AccountsGetDataUserResponse> GetDataUser(Guid id)
     {
-        var verifyUserExists = await _repoUser.VerifyExistsUser_withID(id);
+        var verifyUserExists = await _repoUser.VerifyExistsUser(id);
         if (!verifyUserExists)
         {
             throw new UseCaseException("Usuario não existe. ");
@@ -45,7 +44,7 @@ public class AccountsUseCase_NoService : IAccountsUseCase_NoService
         var GetDataAccount = await _repoBank.GetDataAccounts(id);
         return new AccountsGetDataUserResponse
         {
-            Nome = result.Nome,
+            Nome = GetDataAccount.User.Nome,
             Saldo = GetDataAccount.Saldo.ToString(),
         };
     }

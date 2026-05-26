@@ -20,7 +20,7 @@ public class TransacaoController : ControllerBase
         try
         {
             var IDUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await _usecase.CriarTransacao(Guid.Parse(IDUser), request);
+            var result = await _usecase.CriarTransacao(request, Guid.Parse(IDUser));
             return Ok(result);
         }
         catch (UseCaseException e)

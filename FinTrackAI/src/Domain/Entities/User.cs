@@ -1,7 +1,4 @@
-﻿using System.Data;
-using System.Security.Principal;
-using System.Xml.Linq;
-
+﻿
 namespace FinTrackAI;
 
 public enum OptionsRole
@@ -22,7 +19,6 @@ public class User
     public string Nome { get; set; } = string.Empty;
 
     public string Email { get; set; } = string.Empty;
-
     public string PasswordHash { get; set; } = string.Empty;
 
     public string CPF { get; set; } = string.Empty;
@@ -37,8 +33,7 @@ public class User
 
     public DateTime CreatedAt { get; set; }
 
-    public ICollection<Accounts> Accounts { get; set; }
-        = new List<Accounts>();
+    public Accounts? Accounts { get; set; }
 
     public void Validate_Create()
     {

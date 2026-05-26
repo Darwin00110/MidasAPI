@@ -10,16 +10,16 @@ public class UserRepository : IUserRepository
     {
         _context = context;
     }
-    public async Task<User> VerifyExistsUser(Guid id)
+    public async Task<bool> VerifyExistsUser(Guid id)
     {
         try
         {
             var usuario = await _context.Users.Where(u => u.ID == id).FirstOrDefaultAsync();
             if (usuario == null)
             {
-                throw new RepositoryException("Usuario não existe.");
+                return false;
             }
-            return usuario;
+            return true;
         }
         catch (Exception e)
         {
@@ -43,56 +43,23 @@ public class UserRepository : IUserRepository
             throw new RepositoryException($"Repository Error: {e.Message}");
         }
     }
-    public async Task<bool> VerifyExistsUser_withTelephone(string telefone)
+    public async Task<bool> VerifyExistsUser_withCPF(string CPF)
     {
         try
         {
-            var query = await _context.Users.Where(u => u.Telefone == telefone).FirstOrDefaultAsync();
+            var query = await _context.Users.Where(u => u.CPF == CPF).FirstOrDefaultAsync();
             if (query == null)
             {
                 return false;
             }
             return true;
-        }
-        catch (Exception e)
-        {
-            throw new RepositoryException($"Repository Error: {e.Message}");
-        }
-    }
-    public async Task<bool> VerifyExistsUser_withCPF(string cpf)
-    {
-        try
-        {
-            var usuario = await _context.Users.Where(u => u.CPF == cpf).FirstOrDefaultAsync();
-            if (usuario == null)
-            {
-                return false;
-            }
-            return true;
-        }
-        catch (Exception e)
-        {
-            throw new RepositoryException($"Repository Error: {e.Message}");
-        }
-    }
 
-    public async Task<bool> VerifyExistsUser_withID(Guid id)
-    {
-        try
-        {
-            var usuario = await _context.Users.Where(u => u.ID == id).FirstOrDefaultAsync();
-            if (usuario == null)
-            {
-                return false;
-            }
-            return true;
         }
         catch (Exception e)
         {
             throw new RepositoryException($"Repository Error: {e.Message}");
         }
     }
-
     public async Task<User> CreateUser(User user)
     {
         try
@@ -167,22 +134,7 @@ public class UserRepository : IUserRepository
         }
     }
 
-    public async Task<User> GetDataUserEmail(string email)
-    {
-        try
-        {
-            var result = await _context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
-            if (result == null)
-            {
-                throw new RepositoryException("Usuario não encontrado");
-            }
-            return result;
-        }
-        catch (Exception e)
-        {
-            throw new RepositoryException($"Repository Error: {e.Message}");
-        }
-    }
+
 
     public async Task<List<GetAllUsersResponse>> GetAllUsers()
     {
@@ -215,6 +167,22 @@ public class UserRepository : IUserRepository
             query.Status = OptionsStatus.DESATIVADO;
             await _context.SaveChangesAsync();
             return true;
+        }
+        catch (Exception e)
+        {
+            throw new RepositoryException($"Repository Error: {e.Message}");
+        }
+    }
+    public async Task<User> GetDataUserEmail(string email)
+    {
+        try
+        {
+            var query = await _context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
+            if (query == null)
+            {
+                throw new RepositoryException("Usuario não existe. ");
+            }
+            return query;
         }
         catch (Exception e)
         {
@@ -268,7 +236,7 @@ public class UserRepository : IUserRepository
             throw new RepositoryException($"Repository Error: {e.Message}");
         }
     }
-    public async Task<User> GetDataUser_ID(Guid id)
+    public async Task<User> GetDataUser(Guid id)
     {
         try
         {

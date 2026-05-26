@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FinTrackAI.Migrations
 {
     /// <inheritdoc />
-    public partial class CorrigindoRelacionamentos : Migration
+    public partial class Inicial02 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -55,27 +55,21 @@ namespace FinTrackAI.Migrations
                     ChavePix = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Saldo = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    TipoConta = table.Column<int>(type: "int", nullable: false),
+                    TipoConta = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Status = table.Column<string>(type: "longtext", nullable: false, defaultValue: "ATIVO")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    UserID1 = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci")
+                    CriadoEm = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Accounts", x => x.ID);
-                    table.UniqueConstraint("AK_Accounts_UserID", x => x.UserID);
                     table.ForeignKey(
                         name: "FK_Accounts_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Accounts_Users_UserID1",
-                        column: x => x.UserID1,
-                        principalTable: "Users",
-                        principalColumn: "ID");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -84,30 +78,39 @@ namespace FinTrackAI.Migrations
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SenderAccountId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ReceiverAccountId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    Amount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    Type = table.Column<string>(type: "longtext", nullable: false, defaultValue: "Deposito")
+                    ContaOrigemId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ContaDestinoId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Valor = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    Taxa = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    ValorLiquido = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    Tipo = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Status = table.Column<string>(type: "longtext", nullable: false, defaultValue: "Active")
+                    Status = table.Column<string>(type: "longtext", nullable: false, defaultValue: "PENDENTE")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "longtext", nullable: false)
+                    Descricao = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    Protocolo = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SaldoOrigemAntes = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    SaldoOrigemDepois = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    CriadoEm = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    ConcluidoEm = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    CanceladoEm = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    MotivoCancelamento = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Transacao", x => x.ID);
-                    table.UniqueConstraint("AK_Transacao_SenderAccountId", x => x.SenderAccountId);
                     table.ForeignKey(
-                        name: "FK_Transacao_Accounts_ReceiverAccountId",
-                        column: x => x.ReceiverAccountId,
+                        name: "FK_Transacao_Accounts_ContaDestinoId",
+                        column: x => x.ContaDestinoId,
                         principalTable: "Accounts",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Transacao_Accounts_SenderAccountId",
-                        column: x => x.SenderAccountId,
+                        name: "FK_Transacao_Accounts_ContaOrigemId",
+                        column: x => x.ContaOrigemId,
                         principalTable: "Accounts",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
@@ -115,14 +118,20 @@ namespace FinTrackAI.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Accounts_UserID1",
+                name: "IX_Accounts_UserID",
                 table: "Accounts",
-                column: "UserID1");
+                column: "UserID",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transacao_ReceiverAccountId",
+                name: "IX_Transacao_ContaDestinoId",
                 table: "Transacao",
-                column: "ReceiverAccountId");
+                column: "ContaDestinoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transacao_ContaOrigemId",
+                table: "Transacao",
+                column: "ContaOrigemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_CPF",

@@ -16,30 +16,13 @@ namespace FinTrackAI.Tests
         private readonly Mock<ITokenJWT> _tokenMock;
         private readonly UserUseCase_NoService _usecase;
 
-        private void Simulacao_UsuarioNaoExiste_ID()
+        private void Simulacao_VerifyExistsUser_withEmail(bool x)
         {
-            _repoMock.Setup(x => x.VerifyExistsUser(It.IsAny<Guid>())).ThrowsAsync(new UseCaseException("Usuario não existe."));
+            _repoMock.Setup(x => x.VerifyExistsUser_withEmail(It.IsAny<string>())).ReturnsAsync(x);
         }
-        private void Simulacao_UsuarioExiste_ID()
+        private void Simulacao_verifyExistUser(bool x)
         {
-            _repoMock.Setup(x => x.VerifyExistsUser(It.IsAny<Guid>())).ReturnsAsync(new User
-            {
-                Email = "darwin@gmail.com",
-                Nome = "Darwin"
-            });
-        }
-        private void Simulacao_UsuarioNaoExiste_Email()
-        {
-            _repoMock.Setup(x => x.VerifyExistsUser_withEmail(It.IsAny<string>())).ReturnsAsync(false);
-        }
-        private void Simulacao_UsuarioExiste_Email()
-        {
-            _repoMock.Setup(x => x.VerifyExistsUser_withEmail(It.IsAny<string>())).ReturnsAsync(true);
-        }
-
-        private void Simulacao_HashSenha_VALIDA()
-        {
-            _hashMock.Setup(x => x.HashPassword("chuvamolhada8787")).ReturnsAsync("hashed_password");
+            _repoMock.Setup(x => x.VerifyExistsUser(It.IsAny<Guid>())).ReturnsAsync(x);
         }
         public UserUseCase_NoServiceTests()
         {
@@ -50,138 +33,258 @@ namespace FinTrackAI.Tests
         }
         //=============CREATE User=================//
         [Fact]
-        public async Task CreateUserTest_CasoUsuario_EXISTA()
+        public async Task CreateUser_Caso_UsuarioJaExista_LancarException()
         {
-            Simulacao_UsuarioExiste_Email();
-            Simulacao_HashSenha_VALIDA();
-            var request = new CreateUserRequest
-            {
-                Nome = "Rodolfo",
-                Email = "rodolfo2323@gmail.com",
-                Telefone = "319732348",
-                DataNascimento = new DateTime(2000, 05, 23),
-                CPF = "13139585602",
-                Senha = "chuvamolhada8787"
-            };
-            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.CreateUser(request));
+            Simulacao_VerifyExistsUser_withEmail(true);
+            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.CreateUser(new CreateUserRequest{}));
             Assert.Equal("Usuario ja cadastrado", ex.Message);
         }
         [Fact]
-        public async Task CreateUserTest_CasoUsuario_NAO_EXISTA()
+        public async Task CreateUser_Caso_TudoOK()
         {
-            Simulacao_UsuarioNaoExiste_Email();
-            Simulacao_HashSenha_VALIDA();
+            Simulacao_VerifyExistsUser_withEmail(false);
+            _hashMock.Setup(x => x.HashPassword(It.IsAny<string>())).ReturnsAsync("hashed_password");
             _repoMock.Setup(x => x.CreateUser(It.IsAny<User>())).ReturnsAsync(new User
             {
-                Email = "rodolfo2323@gmail.com",
                 Nome = "Rodolfo",
-            });
-            var request = new CreateUserRequest
-            {
-                Nome = "Rodolfo",
-                Email = "rodolfo2323@gmail.com",
-                Telefone = "319732348",
-                DataNascimento = new DateTime(2000, 05, 23),
+                PasswordHash = "hashed_password",
+                Email = "exemplo@gmail.com",
                 CPF = "13139585602",
-                Senha = "chuvamolhada8787"
-            };
-            var result = await _usecase.CreateUser(request);
+                Telefone = "319732348",
+                Role = OptionsRole.USER,
+                Status = OptionsStatus.ATIVO,
+                CreatedAt = DateTime.Now,
+            });
+            var result = await _usecase.CreateUser(new CreateUserRequest
+            {
+                Senha = "amora0909!",
+                Nome = "Rodolfo",
+                CPF = "13139585602",
+                Email = "exemplo@gmail.com",
+                DataNascimento = new DateTime(2009, 04, 23),
+                Telefone = "319732348",
+            });
             Assert.NotNull(result);
-            Assert.Equal("rodolfo2323@gmail.com", result.Email);
+            Assert.Equal("Rodolfo", result.Nome);
         }
-        //=============READ User=================//
+
         [Fact]
-        public async Task ReadUserTest_CasoUsuario_NAO_EXISTA()
+        public async Task ReadUser_Caso_UsuarioNaoExista_LancarException()
         {
-            var ID_User = Guid.NewGuid();
-            Simulacao_UsuarioNaoExiste_ID();
-            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.ReadUser(ID_User));
-            Assert.Equal("Usuario não existe.", ex.Message);
+            Simulacao_verifyExistUser(false);
+            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.ReadUser(Guid.NewGuid()));
+            Assert.Equal("Usuario não existe. ", ex.Message);
         }
+
         [Fact]
-        public async Task ReadUser_CasoUsuario_EXISTA()
+        public async Task ReadUser_Caso_TudoOK()
         {
-            var ID_User = Guid.NewGuid();
-            Simulacao_UsuarioExiste_ID();
+            Simulacao_verifyExistUser(true);
             _repoMock.Setup(x => x.ReadUser(It.IsAny<Guid>())).ReturnsAsync(new ReadResponse
             {
-                Nome = "Darwin",
+                Nome = "Rodolfo"          
             });
-            var result = await _usecase.ReadUser(ID_User);
+            var result = await _usecase.ReadUser(Guid.NewGuid());
             Assert.NotNull(result);
-            Assert.Equal("Darwin", result.Nome);
+            Assert.Equal("Rodolfo", result.Nome);
         }
-        //=============UPDATE User=================//
         [Fact]
-        public async Task UpdateUser_EmailIgual_DeveLancarException()
+        public async Task UpdateUser_Caso_UsuarioNaoExista_LancarException()
         {
-            _repoMock.Setup(x => x.VerifyExistsUser(It.IsAny<Guid>())).ReturnsAsync(new User
+            Simulacao_verifyExistUser(false);
+            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.UpdateUser(Guid.NewGuid(), new UpdateUserRequest {}));
+            Assert.Equal("Usuario não existe .", ex.Message);            
+        }
+
+        [Fact]
+        public async Task UpdateUser_Caso_UsuarioBloqueado_LancarException()
+        {
+            Simulacao_verifyExistUser(true);
+            _repoMock.Setup(u => u.GetDataUser(It.IsAny<Guid>())).ReturnsAsync(new User
             {
-                Email = "darwin@gmail.com",
-                Nome = "Darwin"
+                Status = OptionsStatus.DESATIVADO
             });
+            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.UpdateUser(Guid.NewGuid(), new UpdateUserRequest{}));
+            Assert.Equal("Usuario bloqueado, entre em contato com o suporte.", ex.Message);
+        }
 
-            var request = new UpdateUserRequest { Email = "darwin@gmail.com" };
-
-            var ex = await Assert.ThrowsAsync<UseCaseException>(() =>
-                _usecase.UpdateUser(Guid.NewGuid(), request));
-
+        [Fact]
+        public async Task UpdateUser_Caso_EmailAnteriorCadastradoNovamente_LancarException()
+        {
+            Simulacao_verifyExistUser(true);
+            _repoMock.Setup(u => u.GetDataUser(It.IsAny<Guid>())).ReturnsAsync(new User
+            {
+                Status = OptionsStatus.ATIVO,
+                Email = "exemplo@gmail.com"
+            });
+            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.UpdateUser(Guid.NewGuid(), new UpdateUserRequest
+            {
+                Email = "exemplo@gmail.com"
+            }));
             Assert.Equal("Email cadastrado anteriormente, tente novamente.", ex.Message);
         }
 
         [Fact]
-        public async Task UpdateUser_CasoUsuario_EXISTA()
+        public async Task UpdateUser_Caso_TudoOK()
         {
-            _repoMock.Setup(x => x.VerifyExistsUser(It.IsAny<Guid>())).ReturnsAsync(new User
+            Simulacao_verifyExistUser(true);
+            _repoMock.Setup(u => u.GetDataUser(It.IsAny<Guid>())).ReturnsAsync(new User
             {
-                Email = "darwin@gmail.com",
-                Nome = "Darwin"
+                Email = "exemplo@gmail.com",
+                Status = OptionsStatus.ATIVO
             });
-            _hashMock.Setup(x => x.HashPassword(It.IsAny<string>())).ReturnsAsync("Hashed_Password");
-            _repoMock.Setup(x => x.UpdateUser(It.IsAny<Guid>(), It.IsAny<User>())).ReturnsAsync(true);
+            _hashMock.Setup(u => u.HashPassword(It.IsAny<string>())).ReturnsAsync("hash_password");
+            _repoMock.Setup(u => u.UpdateUser(It.IsAny<Guid>(), It.IsAny<User>())).ReturnsAsync(true);
 
-            // Email DIFERENTE do cadastrado
-            var request = new UpdateUserRequest
+            var result = await _usecase.UpdateUser(Guid.NewGuid(), new UpdateUserRequest
             {
-                Email = "novo@gmail.com",
-                Senha = "senha",
-                Telefone = "319732348"
-            };
-
-            var result = await _usecase.UpdateUser(Guid.NewGuid(), request);
+                Email = "exemplo02@gmail.com",
+                Telefone = "322345678",
+                Senha = "amora0909!"
+            });
             Assert.True(result);
         }
+
         [Fact]
-        public async Task LoginUser_CasoSenhaSeja_INCORRETA()
+        public async Task LoginUser_Caso_UsuarioNaoExista_LancarException()
         {
-            _repoMock.Setup(x => x.VerifyExistsUser_withEmail(It.IsAny<string>())).ReturnsAsync(true);
+            Simulacao_VerifyExistsUser_withEmail(false);
+            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.LoginUser(new LoginUserRequest
+            {
+                
+            }));
+            Assert.Equal("Usuario não encontrado", ex.Message);
+        }
+
+        [Fact]
+        public async Task LoginUser_Caso_UsuarioEstejaDESATIVADO_LancarException()
+        {
+            Simulacao_VerifyExistsUser_withEmail(true);
             _repoMock.Setup(x => x.GetDataUserEmail(It.IsAny<string>())).ReturnsAsync(new User
             {
-                PasswordHash = "senha_segredo"
+                Status = OptionsStatus.DESATIVADO
             });
-            _hashMock.Setup(x => x.VerifyPassword(It.IsAny<string>(), It.IsAny<string>())).ThrowsAsync(new UseCaseException("Senha incorreta"));
-            var request = new LoginUserRequest
+            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.LoginUser(new LoginUserRequest
             {
+                Email = "exemplo@gmail.com"
+            }));
+            Assert.Equal("Usuario bloqueado, entre em contato com o suporte.", ex.Message);
+        }
 
-            };
-            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.LoginUser(request));
+        [Fact]
+        public async Task LoginUser_Caso_SenhaIncorreta_LancarException()
+        {
+            Simulacao_VerifyExistsUser_withEmail(true);
+            _repoMock.Setup(x => x.GetDataUserEmail(It.IsAny<string>())).ReturnsAsync(new User
+            {
+                Status = OptionsStatus.ATIVO
+            });
+            _hashMock.Setup(x => x.VerifyPassword(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(false);
+            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.LoginUser(new LoginUserRequest
+            {
+                Email = "exemplo@gmail.com"
+            }));
             Assert.Equal("Senha incorreta", ex.Message);
         }
 
-        //===============DELETE User=================//
         [Fact]
-        public async Task DeleteUser_CasoUsuario_NAO_EXISTA()
+        public async Task LoginUser_Caso_TudoOK()
         {
-            _repoMock.Setup(x => x.VerifyExistsUser(It.IsAny<Guid>())).ThrowsAsync(new UseCaseException("Usuario não existe"));
-            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.DeleteUser(Guid.NewGuid()));
-            Assert.Equal("Usuario não existe", ex.Message);
+            Simulacao_VerifyExistsUser_withEmail(true);
+            _repoMock.Setup(x => x.GetDataUserEmail(It.IsAny<string>())).ReturnsAsync(new User
+            {
+                Status = OptionsStatus.ATIVO,
+                ID = Guid.NewGuid(),
+                Email = "exemplo@gmail.com",
+                Role = OptionsRole.USER,
+                Nome = "Rodolfo",
+                PasswordHash = "amora0909!"
+            });
+            _hashMock.Setup(x => x.VerifyPassword(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
+            _tokenMock.Setup(x => x.GenerativeToken(It.IsAny<User>())).ReturnsAsync("token");
+            var result = await _usecase.LoginUser(new LoginUserRequest
+            {
+                Email = "exemplo@gmail.com",
+                Senha = "amora0909!"    
+            });
+            Assert.Equal("token", result);
         }
         [Fact]
-        public async Task DeleteUser_CasoUsuario_EXISTA()
+        public async Task PatchUpdateUser_Caso_UsuarioNaoExista_LancarException()
         {
-            _repoMock.Setup(x => x.VerifyExistsUser(It.IsAny<Guid>())).ReturnsAsync(new User { });
-            _repoMock.Setup(x => x.DeleteUser(It.IsAny<Guid>())).ReturnsAsync(true);
-            var result = await _usecase.DeleteUser(Guid.NewGuid());
+            Simulacao_verifyExistUser(false);
+            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.PatchUpdateUser(Guid.NewGuid(), new UpdateUserRequest{}));
+            Assert.Equal("O usuario não existe", ex.Message);
+        }
+
+        [Fact]
+        public async Task PatchUpdateUser_Caso_UsuarioEstejaBloqueado_LancarException()
+        {
+            Simulacao_verifyExistUser(true);
+            _repoMock.Setup(x => x.GetDataUser(It.IsAny<Guid>())).ReturnsAsync(new User
+            {
+                Status = OptionsStatus.DESATIVADO
+            });
+            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.PatchUpdateUser(Guid.NewGuid(), new UpdateUserRequest
+            {
+                
+            }));
+            Assert.Equal("Usuario bloqueado, entre em contato com o suporte.", ex.Message);
+        }
+
+        [Fact]
+        public async Task PatchUpdateUser_Caso_EmailJaCadastrado_LancarException()
+        {
+            Simulacao_verifyExistUser(true);
+            _repoMock.Setup(x => x.GetDataUser(It.IsAny<Guid>())).ReturnsAsync(new User
+            {
+                Email = "exemplo@gmail.com",
+                Status = OptionsStatus.ATIVO
+            });
+            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.PatchUpdateUser(Guid.NewGuid(), new UpdateUserRequest
+            {
+                Email = "exemplo@gmail.com"
+            }));
+            Assert.Equal("Email ja cadastrado anteriormente.", ex.Message);
+        }
+
+        [Fact]
+        public async Task PatchUpdateUser_Caso_TelefoneJaCadastrado_LancarException()
+        {
+            Simulacao_verifyExistUser(true);
+            _repoMock.Setup(x => x.GetDataUser(It.IsAny<Guid>())).ReturnsAsync(new User
+            {
+                Status = OptionsStatus.ATIVO,
+                Email = "exemplo@gmail.com",
+                Telefone = "111111111"
+            });
+            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.PatchUpdateUser(Guid.NewGuid(), new UpdateUserRequest
+            {
+                Email = "exemplo2@gmail.com",
+                Telefone = "111111111"
+            }));
+            Assert.Equal("Telefone ja cadastrado anteriormente.", ex.Message);
+        }
+
+        [Fact]
+        public async Task PatchUpdateUser_Caso_TudoOK()
+        {
+            Simulacao_verifyExistUser(true);
+            _repoMock.Setup(x => x.GetDataUser(It.IsAny<Guid>())).ReturnsAsync(new User
+            {
+                Status = OptionsStatus.ATIVO,
+                Email = "exemplo@gmail.com",
+                Telefone = "111111111"
+            });
+            _hashMock.Setup(x => x.HashPassword(It.IsAny<string>())).ReturnsAsync("hash_password");
+            _repoMock.Setup(x => x.PatchUpdateUser(It.IsAny<Guid>(), It.IsAny<User>())).ReturnsAsync(true);
+            
+            var result = await _usecase.PatchUpdateUser(Guid.NewGuid(), new UpdateUserRequest
+            {
+                Email = "exemplo2@gmail.com",
+                Senha = "amora0909!",
+                Telefone = "111111112"    
+            });
             Assert.True(result);
         }
 

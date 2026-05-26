@@ -46,12 +46,12 @@ public class AdminUseCase_NoService : IAdminUseCase_NoService
 
     public async Task<ReadResponse> ReadAdmin(Guid id)
     {
-        var verifyUserExist = await _repo.VerifyExistsUser_withID(id);
+        var verifyUserExist = await _repo.VerifyExistsUser(id);
         if (!verifyUserExist)
         {
             throw new UseCaseException("Usuario não existe. ");
         }
-        var GetDataUser = await _repo.GetDataUser_ID(id);
+        var GetDataUser = await _repo.GetDataUser(id);
         if (GetDataUser.Status == OptionsStatus.DESATIVADO)
         {
             throw new UseCaseException("Usuario bloqueado, entre em contato com o suporte.");
@@ -61,12 +61,12 @@ public class AdminUseCase_NoService : IAdminUseCase_NoService
     }
     public async Task<bool> UpdateAdmin(Guid id, UpdateAdminRequest request)
     {
-        var GetDataUser = await _repo.GetDataUser_ID(id);
+        var GetDataUser = await _repo.GetDataUser(id);
         if (GetDataUser.Status == OptionsStatus.DESATIVADO)
         {
             throw new UseCaseException("Usuario bloqueado, entre em contato com o suporte.");
         }
-        var VerifyUser_ID = await _repo.VerifyExistsUser_withID(id);
+        var VerifyUser_ID = await _repo.VerifyExistsUser(id);
         if (!VerifyUser_ID)
         {
             throw new UseCaseException("Usuario não existe");
@@ -75,11 +75,6 @@ public class AdminUseCase_NoService : IAdminUseCase_NoService
         if (VerifyUser_Email)
         {
             throw new UseCaseException("Email ja cadastrado");
-        }
-        var VerifyUser_Telefone = await _repo.VerifyExistsUser_withTelephone(request.Telefone);
-        if (VerifyUser_Telefone)
-        {
-            throw new UseCaseException("Telefone ja cadastrado");
         }
         var hashedSenha = await _hash.HashPassword(request.Senha);
         User DataUser = new User
@@ -95,7 +90,7 @@ public class AdminUseCase_NoService : IAdminUseCase_NoService
     }
     public async Task<bool> DeleteAdmin(Guid id)
     {
-        var verifyUserExists = await _repo.VerifyExistsUser_withID(id);
+        var verifyUserExists = await _repo.VerifyExistsUser(id);
         if (!verifyUserExists)
         {
             throw new UseCaseException("Usuario não existe. ");
@@ -105,36 +100,46 @@ public class AdminUseCase_NoService : IAdminUseCase_NoService
     }
     public async Task<bool> PathUpdateADM(Guid id, UpdateAdminRequest request)
     {
-        var verifyUserExists = await _repo.VerifyExistsUser_withID(id);
+        var verifyUserExists = await _repo.VerifyExistsUser(id);
         if (!verifyUserExists)
         {
             throw new UseCaseException("O usuario não existe");
         }
-        var DataUser = await _repo.VerifyExistsUser(id);
+        var DataUser = await _repo.GetDataUser(id);
         if (request.Email?.Equals(DataUser.Email) == true)
             throw new UseCaseException("Email ja cadastrado anteriormente.");
 
         if (request.Telefone?.Equals(DataUser.Telefone) == true)
             throw new UseCaseException("Telefone ja cadastrado anteriormente.");
+        var verifyHashPassword = await _hash.VerifyPassword(request.Senha, DataUser.PasswordHash);
+        if (verifyHashPassword)
+        {
+            throw new UseCaseException("Senha ja cadastrada anteriormente.");
+        }
+        var hashedSenha = await _hash.HashPassword(request.Senha);
         var user = new User
         {
             Email = request.Email ?? DataUser.Email,
             Telefone = request.Telefone ?? DataUser.Telefone,
-            PasswordHash = request.Senha ?? DataUser.PasswordHash,
+            PasswordHash = hashedSenha
         };
         return await _repo.PatchUpdateUser(id, user);
     }
     public async Task<List<GetAllUsersResponse>> ReadAllUsers(Guid id)
     {
-        var verifyUserExists = await _repo.VerifyExistsUser_withID(id);
+        var verifyUserExists = await _repo.VerifyExistsUser(id);
         if (!verifyUserExists)
         {
             throw new UseCaseException("Usuario não existe. ");
         }
-        var DataUser = await _repo.VerifyExistsUser(id);
+        var DataUser = await _repo.GetDataUser(id);
         if (DataUser.Role != OptionsRole.ADMIN)
         {
             throw new UseCaseException("Operação negada, Usuario não é um administrador");
+        }
+        if (DataUser.Status == OptionsStatus.DESATIVADO)
+        {
+            throw new UseCaseException("Operação negada, Usuario esta bloqueado");
         }
         var result = await _repo.GetAllUsers();
         return result;
@@ -142,7 +147,7 @@ public class AdminUseCase_NoService : IAdminUseCase_NoService
 
     public async Task<bool> BlockAcessUser(Guid id)
     {
-        var verifyUserData = await _repo.VerifyExistsUser(id);
+        var verifyUserData = await _repo.GetDataUser(id);
         if (verifyUserData.Status == OptionsStatus.DESATIVADO)
         {
             throw new UseCaseException("Usuario já esta bloqueado");
@@ -176,7 +181,7 @@ public class AdminUseCase_NoService : IAdminUseCase_NoService
     }
     public async Task<bool> UnlockedAcessUser(Guid id)
     {
-        var verifyUserData = await _repo.VerifyExistsUser(id);
+        var verifyUserData = await _repo.GetDataUser(id);
         if (verifyUserData.Status == OptionsStatus.ATIVO)
         {
             throw new UseCaseException("Usuario já esta desbloqueado");
@@ -186,7 +191,7 @@ public class AdminUseCase_NoService : IAdminUseCase_NoService
     }
     public async Task<ReadResponse> GetDataUser_Adm(Guid id)
     {
-        var VerifyExistsUser = await _repo.VerifyExistsUser_withID(id);
+        var VerifyExistsUser = await _repo.VerifyExistsUser(id);
         if (!VerifyExistsUser)
         {
             throw new UseCaseException("Usuario não existe");

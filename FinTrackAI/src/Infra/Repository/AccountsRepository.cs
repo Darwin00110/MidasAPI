@@ -13,7 +13,7 @@ public class AccountsRepository : IAccountsRepository
     {
         try
         {
-            var query = _context.Accounts.AddAsync(Data);
+            var query = await _context.Accounts.AddAsync(Data);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -54,4 +54,20 @@ public class AccountsRepository : IAccountsRepository
             throw new RepositoryException($"Repository Error: {e.Message}");
         }
     }
+    public async Task<bool> VerifyAccountExists(Guid id)
+    {
+        try
+        {
+            var query = await _context.Accounts.Where(a => a.UserID == id).FirstOrDefaultAsync();
+            if (query == null)
+            {
+                return false;
+            }
+            return true;
+        } catch(Exception e)
+        {
+            throw new RepositoryException($"Repository Error: {e.Message}");
+        }
+    }
+    
 }

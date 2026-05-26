@@ -29,7 +29,7 @@ namespace FinTrackAI.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("CriadoEm")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("NumeroAgencia")
@@ -49,20 +49,17 @@ namespace FinTrackAI.Migrations
                         .HasColumnType("longtext")
                         .HasDefaultValue("ATIVO");
 
-                    b.Property<int>("TipoConta")
-                        .HasColumnType("int");
+                    b.Property<string>("TipoConta")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("UserID")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("UserID1")
-                        .HasColumnType("char(36)");
-
                     b.HasKey("ID");
 
-                    b.HasAlternateKey("UserID");
-
-                    b.HasIndex("UserID1");
+                    b.HasIndex("UserID")
+                        .IsUnique();
 
                     b.ToTable("Accounts");
                 });
@@ -128,39 +125,62 @@ namespace FinTrackAI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CanceladoEm")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Description")
+                    b.Property<DateTime?>("ConcluidoEm")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("ContaDestinoId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("ContaOrigemId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("ReceiverAccountId")
-                        .HasColumnType("char(36)");
+                    b.Property<string>("MotivoCancelamento")
+                        .HasColumnType("longtext");
 
-                    b.Property<Guid>("SenderAccountId")
-                        .HasColumnType("char(36)");
+                    b.Property<string>("Protocolo")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("SaldoOrigemAntes")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("SaldoOrigemDepois")
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("longtext")
-                        .HasDefaultValue("Active");
+                        .HasDefaultValue("PENDENTE");
 
-                    b.Property<string>("Type")
+                    b.Property<decimal>("Taxa")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<string>("Tipo")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("longtext")
-                        .HasDefaultValue("Deposito");
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("ValorLiquido")
+                        .HasColumnType("decimal(65,30)");
 
                     b.HasKey("ID");
 
-                    b.HasAlternateKey("SenderAccountId");
+                    b.HasIndex("ContaDestinoId");
 
-                    b.HasIndex("ReceiverAccountId");
+                    b.HasIndex("ContaOrigemId");
 
                     b.ToTable("Transacao");
                 });
@@ -168,35 +188,31 @@ namespace FinTrackAI.Migrations
             modelBuilder.Entity("FinTrackAI.Accounts", b =>
                 {
                     b.HasOne("FinTrackAI.User", "User")
-                        .WithOne()
+                        .WithOne("Accounts")
                         .HasForeignKey("FinTrackAI.Accounts", "UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("FinTrackAI.User", null)
-                        .WithMany("Accounts")
-                        .HasForeignKey("UserID1");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("FinTrackAI.src.Domain.Entities.Transacao", b =>
                 {
-                    b.HasOne("FinTrackAI.Accounts", "ReceiverAccount")
+                    b.HasOne("FinTrackAI.Accounts", "ContaDestino")
                         .WithMany("TransacoesRecebidas")
-                        .HasForeignKey("ReceiverAccountId")
+                        .HasForeignKey("ContaDestinoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("FinTrackAI.Accounts", "SenderAccount")
+                    b.HasOne("FinTrackAI.Accounts", "ContaOrigem")
                         .WithMany("TransacoesEnviadas")
-                        .HasForeignKey("SenderAccountId")
+                        .HasForeignKey("ContaOrigemId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("ReceiverAccount");
+                    b.Navigation("ContaDestino");
 
-                    b.Navigation("SenderAccount");
+                    b.Navigation("ContaOrigem");
                 });
 
             modelBuilder.Entity("FinTrackAI.Accounts", b =>

@@ -2,12 +2,10 @@
 
 public interface IUserRepository
 {
-    public Task<User> VerifyExistsUser(Guid id);
+    public Task<bool> VerifyExistsUser(Guid id);
     public Task<bool> VerifyExistsUser_withEmail(string email);
-    public Task<User> GetDataUserEmail(string email);
-    public Task<bool> VerifyExistsUser_withCPF(string cpf);
-    public Task<bool> VerifyExistsUser_withID(Guid id);
-    public Task<bool> VerifyExistsUser_withTelephone(string telefone);
+    public Task<bool> VerifyExistsUser_withCPF(string CPF);
+   
 
     public Task<User> CreateUser(User user);
     public Task<ReadResponse> ReadUser(Guid id);
@@ -15,9 +13,10 @@ public interface IUserRepository
     public Task<bool> DeleteUser(Guid id);
 
     public Task<List<GetAllUsersResponse>> GetAllUsers();
-    public Task<User> GetDataUser_ID(Guid id);
+    public Task<User> GetDataUser(Guid id);
     public Task<bool> BlockAcessUser(Guid id);
     public Task<bool> UnlockedAcessUser(Guid id);
+    public Task<User> GetDataUserEmail(string email);
 
     public Task<bool> PatchUpdateUser(Guid id, User user);
 }

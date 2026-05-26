@@ -32,6 +32,8 @@ public class UserUseCase_NoService : IUserUseCase_NoService
             Nome = request.Nome,
             DataNascimento = request.DataNascimento,
             Role = OptionsRole.USER,
+            Status = OptionsStatus.ATIVO,
+            CreatedAt = DateTime.Now,
         };
         DataUser.Validate_Create();
         var result = await _repo.CreateUser(DataUser);
@@ -40,7 +42,11 @@ public class UserUseCase_NoService : IUserUseCase_NoService
 
     public async Task<ReadResponse> ReadUser(Guid id)
     {
-        await _repo.VerifyExistsUser(id);
+        var verifyUserExists = await _repo.VerifyExistsUser(id);
+        if (!verifyUserExists)
+        {
+            throw new UseCaseException("Usuario não existe. ");
+        }
         var result = await _repo.ReadUser(id);
         return result;
     }
@@ -48,8 +54,16 @@ public class UserUseCase_NoService : IUserUseCase_NoService
     public async Task<bool> UpdateUser(Guid id, UpdateUserRequest request)
     {
         var verifyUser = await _repo.VerifyExistsUser(id);
-
-        if (request.Email == verifyUser.Email)
+        if (!verifyUser)
+        {
+            throw new UseCaseException("Usuario não existe .");
+        }
+        var DataUser = await _repo.GetDataUser(id);
+        if (DataUser.Status == OptionsStatus.DESATIVADO)
+        {
+            throw new UseCaseException("Usuario bloqueado, entre em contato com o suporte.");
+        }
+        if (request.Email == DataUser.Email)
         {
             throw new UseCaseException("Email cadastrado anteriormente, tente novamente.");
         }
@@ -70,17 +84,17 @@ public class UserUseCase_NoService : IUserUseCase_NoService
     public async Task<string> LoginUser(LoginUserRequest request)
     {
         var verifyUser = await _repo.VerifyExistsUser_withEmail(request.Email);
-        if(!verifyUser)
+        if (!verifyUser)
         {
             throw new UseCaseException("Usuario não encontrado");
         }
         var GetDataUser = await _repo.GetDataUserEmail(request.Email);
-        if(GetDataUser.Status == OptionsStatus.DESATIVADO)
+        if (GetDataUser.Status == OptionsStatus.DESATIVADO)
         {
             throw new UseCaseException("Usuario bloqueado, entre em contato com o suporte.");
         }
         var hashedPassword = await _hashed.VerifyPassword(request.Senha, GetDataUser.PasswordHash);
-        if(!hashedPassword)
+        if (!hashedPassword)
         {
             throw new UseCaseException("Senha incorreta");
         }
@@ -104,17 +118,22 @@ public class UserUseCase_NoService : IUserUseCase_NoService
 
     public async Task<bool> PatchUpdateUser(Guid id, UpdateUserRequest request)
     {
-        var verifyUserExists = await _repo.VerifyExistsUser_withID(id);
+        var verifyUserExists = await _repo.VerifyExistsUser(id);
         if (!verifyUserExists)
         {
             throw new UseCaseException("O usuario não existe");
         }
-        var DataUser = await _repo.VerifyExistsUser(id);
+        var DataUser = await _repo.GetDataUser(id);
+        if (DataUser.Status == OptionsStatus.DESATIVADO)
+        {
+            throw new UseCaseException("Usuario bloqueado, entre em contato com o suporte.");
+        }
         if (request.Email?.Equals(DataUser.Email) == true)
             throw new UseCaseException("Email ja cadastrado anteriormente.");
 
         if (request.Telefone?.Equals(DataUser.Telefone) == true)
             throw new UseCaseException("Telefone ja cadastrado anteriormente.");
+        
         var user = new User
         {
             Email = request.Email ?? DataUser.Email,
@@ -124,6 +143,6 @@ public class UserUseCase_NoService : IUserUseCase_NoService
         var senhaHash = await _hashed.HashPassword(user.PasswordHash);
         user.PasswordHash = senhaHash;
 
-        return await _repo.PatchUpdateUser(id, user);    
+        return await _repo.PatchUpdateUser(id, user);
     }
 }

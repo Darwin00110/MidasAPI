@@ -4,5 +4,5 @@ namespace FinTrackAI;
 
 public interface ITransacaoUseCase
 {
-    public Task<Transacao> CriarTransacao(Guid ID, CriarTransacaoRequest request);
+    public Task<Transacao> CriarTransacao(CriarTransacaoRequest request, Guid userID);
 }
