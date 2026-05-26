@@ -7,5 +7,6 @@
         public Task<bool> UpdateUser(Guid id, UpdateUserRequest request);
         public Task<bool> DeleteUser(Guid id);
         public Task<string> LoginUser(LoginUserRequest request);
+        public Task<bool> PatchUpdateUser(Guid id, UpdateUserRequest request);
     }
 }

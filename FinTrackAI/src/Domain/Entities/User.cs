@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Security.Principal;
 using System.Xml.Linq;
 
 namespace FinTrackAI;
@@ -9,7 +10,7 @@ public enum OptionsRole
     ADMIN
 }
 
-public enum OptionsStatusUser
+public enum OptionsStatus
 {
     ATIVO,
     DESATIVADO
@@ -18,21 +19,32 @@ public enum OptionsStatusUser
 public class User
 {
     public Guid ID { get; set; }
-    public string? Nome { get; set; }
-    public string? Email { get; set; }
-    public string? Data_nascimento { get; set; }
-    public string? Senha { get; set; }
+    public string Nome { get; set; } = string.Empty;
+
+    public string Email { get; set; } = string.Empty;
+
+    public string PasswordHash { get; set; } = string.Empty;
+
+    public string CPF { get; set; } = string.Empty;
+
+    public string Telefone { get; set; } = string.Empty;
+
+    public DateTime DataNascimento { get; set; }
+
     public OptionsRole Role { get; set; }
-    public string? Telefone { get; set; }
-    public string? CPF { get; set; }
-    public OptionsStatusUser StatusUsuario { get; set; }
+
+    public OptionsStatus Status { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public ICollection<Accounts> Accounts { get; set; }
+        = new List<Accounts>();
 
     public void Validate_Create()
     {
         Validate_ID();
         Validate_Nome();
         Validate_Email();
-        Validate_Senha();
         Validate_Telefone();
         Validate_CPF();
     }
@@ -85,13 +97,6 @@ public class User
             throw new DomainException("Email esta no formato invalido, ex: (exemplo@gmail.com)");
         }
     }
-    public void Validate_Senha()
-    {
-        if (string.IsNullOrEmpty(Senha))
-        {
-            throw new DomainException("Senha não pode estar vazio.");
-        }
-    }
 
     public void Validate_Telefone()
     {
@@ -122,17 +127,6 @@ public class User
         if (CPF.Length != 11)
         {
             throw new DomainException("CPF deve conter 11 caracteres");
-        }
-    }
-    public void Validate_DataNascimento()
-    {
-        if (string.IsNullOrWhiteSpace(Data_nascimento))
-        {
-            throw new DomainException("Data nascimento não pode estar vazio.");
-        }
-        if (!Data_nascimento.Contains("//"))
-        {
-            throw new DomainException("Data nascimento invalida, ex: ( 30/01/2008 )");
         }
     }
 }

@@ -15,7 +15,9 @@ public interface IUserRepository
     public Task<bool> DeleteUser(Guid id);
 
     public Task<List<GetAllUsersResponse>> GetAllUsers();
+    public Task<User> GetDataUser_ID(Guid id);
     public Task<bool> BlockAcessUser(Guid id);
     public Task<bool> UnlockedAcessUser(Guid id);
 
+    public Task<bool> PatchUpdateUser(Guid id, User user);
 }

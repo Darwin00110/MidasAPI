@@ -13,6 +13,7 @@ public class AdminController : ControllerBase
     {
         _adminUseCase = adminUseCase;
     }
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("register")]
     public async Task<IActionResult> CreateAdmin([FromBody] CreateAdminRequest request)
     {
@@ -50,6 +51,7 @@ public class AdminController : ControllerBase
             });
         }
     }
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginUserRequest request)
     {
@@ -70,6 +72,7 @@ public class AdminController : ControllerBase
         }
     }
     [Authorize(Roles = "ADMIN")]
+    [Authorize(Policy = "AtivoApenas")]
     [HttpPut("me")]
     public async Task<IActionResult> UpdateAdmin([FromBody] UpdateAdminRequest request)
     {
@@ -88,6 +91,7 @@ public class AdminController : ControllerBase
         }
     }
     [Authorize(Roles = "ADMIN")]
+    [Authorize(Policy = "AtivoApenas")]
     [HttpDelete("me")]
     public async Task<IActionResult> DeleteAdmin()
     {
@@ -105,14 +109,38 @@ public class AdminController : ControllerBase
             });
         }
     }
+    [Authorize(Policy = "AtivoApenas")]
+    [Authorize(Roles = "ADMIN")]
+    [HttpPatch("me")]
+    public async Task<IActionResult> PathUpdateADM(UpdateAdminRequest request)
+    {
+        try
+        {
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await _adminUseCase.PathUpdateADM(Guid.Parse(userID), request);
+            if (!result)
+            {
+                return BadRequest();
+            }
+            return Ok(200);
+        } catch(Exception e)
+        {
+            return BadRequest(new
+            {
+                error = e.Message
+            });
+        }
+    }
 
     [Authorize(Roles = "ADMIN")]
+    [Authorize(Policy = "AtivoApenas")]
     [HttpGet("Users")]
     public async Task<IActionResult> ListAllUsers()
     {
         try
         {
-            var result = await _adminUseCase.ReadAllUsers();
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await _adminUseCase.ReadAllUsers(Guid.Parse(userID));
             return Ok(new
             {
                 data = result
@@ -126,6 +154,7 @@ public class AdminController : ControllerBase
         }
     }
     [Authorize(Roles = "ADMIN")]
+    [Authorize(Policy = "AtivoApenas")]
     [HttpPatch("Users/{id}/block")]
     public async Task<IActionResult> BloquearAcessoUsuario(Guid id)
     {
@@ -152,6 +181,7 @@ public class AdminController : ControllerBase
         }
     }
     [Authorize(Roles = "ADMIN")]
+    [Authorize(Policy = "AtivoApenas")]
     [HttpPatch("Users/{id}/unlocked")]
     public async Task<IActionResult> LiberarAcessoUsuario(Guid id)
     {
@@ -179,6 +209,7 @@ public class AdminController : ControllerBase
         }
     }
     [Authorize(Roles = "ADMIN")]
+    [Authorize(Policy = "AtivoApenas")]
     [HttpGet("Users/{id}/Data")]
     public async Task<IActionResult> GetDataUser(Guid id)
     {

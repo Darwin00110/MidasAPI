@@ -20,7 +20,8 @@ public class UserRepository : IUserRepository
                 throw new RepositoryException("Usuario não existe.");
             }
             return usuario;
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             throw new RepositoryException($"Repository Error: {e.Message}");
         }
@@ -63,12 +64,13 @@ public class UserRepository : IUserRepository
         try
         {
             var usuario = await _context.Users.Where(u => u.CPF == cpf).FirstOrDefaultAsync();
-            if(usuario == null)
+            if (usuario == null)
             {
                 return false;
             }
-            return true;       
-        } catch (Exception e)
+            return true;
+        }
+        catch (Exception e)
         {
             throw new RepositoryException($"Repository Error: {e.Message}");
         }
@@ -109,7 +111,7 @@ public class UserRepository : IUserRepository
         try
         {
             var usuario = await _context.Users.Where(u => u.ID == id).FirstOrDefaultAsync();
-            if(usuario == null)
+            if (usuario == null)
             {
                 throw new RepositoryException("Usuario não encontrado");
             }
@@ -118,8 +120,8 @@ public class UserRepository : IUserRepository
                 Nome = usuario.Nome,
                 Email = usuario.Email,
                 Telefone = usuario.Telefone,
-                Data_Nascimento = usuario.Data_nascimento,
-                CPF = usuario.CPF
+                Data_Nascimento = usuario.DataNascimento,
+                CPF = usuario.CPF,
             };
         }
         catch (Exception e)
@@ -132,11 +134,12 @@ public class UserRepository : IUserRepository
     {
         try
         {
-            var query = await _context.Users.Where(u => u.ID == id).ExecuteUpdateAsync(setters => 
+            var query = await _context.Users.Where(u => u.ID == id).ExecuteUpdateAsync(setters =>
             setters.SetProperty(u => u.Email, user.Email)
             .SetProperty(u => u.Telefone, user.Telefone)
-            .SetProperty(u => u.Senha, user.Senha)
+            .SetProperty(u => u.PasswordHash, user.PasswordHash)
             );
+            await _context.SaveChangesAsync();
             return true;
         }
         catch (Exception e)
@@ -149,7 +152,12 @@ public class UserRepository : IUserRepository
     {
         try
         {
-            await _context.Users.Where(u => u.ID == id).ExecuteDeleteAsync();
+            var query = await _context.Users.Where(u => u.ID == id).FirstOrDefaultAsync();
+            if (query == null)
+            {
+                throw new RepositoryException("Usuario não existe. ");
+            }
+            query.Status = OptionsStatus.DESATIVADO;
             await _context.SaveChangesAsync();
             return true;
         }
@@ -164,7 +172,7 @@ public class UserRepository : IUserRepository
         try
         {
             var result = await _context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
-            if(result == null)
+            if (result == null)
             {
                 throw new RepositoryException("Usuario não encontrado");
             }
@@ -189,7 +197,8 @@ public class UserRepository : IUserRepository
                 Telefone = u.Telefone
             }).ToListAsync();
             return Usuarios;
-        } catch(Exception e)
+        }
+        catch (Exception e)
         {
             throw new RepositoryException($"Repository Error: {e.Message}");
         }
@@ -198,15 +207,16 @@ public class UserRepository : IUserRepository
     {
         try
         {
-            var query = _context.Users.Where(u => u.ID == id).FirstOrDefaultAsync();
-            if(query == null)
+            var query = await _context.Users.Where(u => u.ID == id).FirstOrDefaultAsync();
+            if (query == null)
             {
                 throw new RepositoryException("Usuario não existe. ");
             }
-            query.Result.StatusUsuario = OptionsStatusUser.DESATIVADO;
+            query.Status = OptionsStatus.DESATIVADO;
             await _context.SaveChangesAsync();
             return true;
-        } catch(Exception e)
+        }
+        catch (Exception e)
         {
             throw new RepositoryException($"Repository Error: {e.Message}");
         }
@@ -215,14 +225,59 @@ public class UserRepository : IUserRepository
     {
         try
         {
-            var query = _context.Users.Where(u => u.ID == id).FirstOrDefaultAsync();
+            var query = await _context.Users.Where(u => u.ID == id).FirstOrDefaultAsync();
             if (query == null)
             {
                 throw new RepositoryException("Usuario não existe. ");
             }
-            query.Result.StatusUsuario = OptionsStatusUser.ATIVO;
+            query.Status = OptionsStatus.ATIVO;
             await _context.SaveChangesAsync();
             return true;
+        }
+        catch (Exception e)
+        {
+            throw new RepositoryException($"Repository Error: {e.Message}");
+        }
+    }
+    public async Task<bool> PatchUpdateUser(Guid id, User user)
+    {
+        try
+        {
+            var query = await _context.Users.Where(u => u.ID == id).FirstOrDefaultAsync();
+            if (query == null)
+            {
+                return false;
+            }
+            if (query.Email != null || query.Email != "")
+            {
+                query.Email = user.Email;
+            }
+            if (query.Telefone != null || query.Telefone != "")
+            {
+                query.Telefone = user.Telefone;
+            }
+            if (query.PasswordHash != null || query.PasswordHash != "")
+            {
+                query.PasswordHash = user.PasswordHash;
+            }
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            throw new RepositoryException($"Repository Error: {e.Message}");
+        }
+    }
+    public async Task<User> GetDataUser_ID(Guid id)
+    {
+        try
+        {
+            var query = await _context.Users.Where(u => u.ID == id).FirstOrDefaultAsync();
+            if (query == null)
+            {
+                throw new RepositoryException("Usuario não existe");
+            }
+            return query;
         }
         catch (Exception e)
         {

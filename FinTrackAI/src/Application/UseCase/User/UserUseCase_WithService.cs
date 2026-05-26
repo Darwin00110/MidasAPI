@@ -20,11 +20,11 @@ public class UserUseCase_WithService : IUserUseCase_WithService
             ID = Guid.NewGuid(),
             Role = OptionsRole.USER,
             Email = request.Email,
-            Senha = request.Senha,
+            PasswordHash = request.Senha,
             CPF = request.CPF,
             Telefone = request.Telefone,
             Nome = GetDataUser_cpf.Data.Nome,
-            Data_nascimento = GetDataUser_cpf.Data.Data_nascimento,
+            DataNascimento = DateTime.Parse(GetDataUser_cpf.Data.Data_nascimento),
         };
         DataUser.Validate_Create();
         var result = await _repo.CreateUser(DataUser);

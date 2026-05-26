@@ -21,7 +21,7 @@ public class TokenJWT : ITokenJWT
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
             new Claim(ClaimTypes.Name, user.Nome),
-            new Claim("Status", user.StatusUsuario.ToString())
+            new Claim("Status", user.Status.ToString())
         };
      
 

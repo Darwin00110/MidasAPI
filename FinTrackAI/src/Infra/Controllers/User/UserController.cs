@@ -1,6 +1,8 @@
-﻿using System.Security.Claims;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using FinTrackAI.src.Domain.Interfaces.UserUseCase_NoService;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinTrackAI;
@@ -123,4 +125,24 @@ public class UserController : ControllerBase
             });
         }
     }
+    [Authorize(Roles = "USER")]
+    [Authorize(Policy = "AtivoApenas")]
+    [HttpPatch("me")]
+    public async Task<IActionResult> PatchUpdateUser(UpdateUserRequest request)
+    {
+        try
+        {
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await _userUseCase.PatchUpdateUser(Guid.Parse(userID), request);
+            return Ok(200);
+        } catch(Exception e)
+        {
+            return BadRequest(new
+            {
+                error = e.Message
+            });
+        }
+    }
 }
+
+

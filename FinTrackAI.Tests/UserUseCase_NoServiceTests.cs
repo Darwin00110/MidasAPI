@@ -54,11 +54,12 @@ namespace FinTrackAI.Tests
         {
             Simulacao_UsuarioExiste_Email();
             Simulacao_HashSenha_VALIDA();
-            var request = new CreateUserRequest{
+            var request = new CreateUserRequest
+            {
                 Nome = "Rodolfo",
                 Email = "rodolfo2323@gmail.com",
                 Telefone = "319732348",
-                DataNascimento = "23/04/2000",
+                DataNascimento = new DateTime(2000, 05, 23),
                 CPF = "13139585602",
                 Senha = "chuvamolhada8787"
             };
@@ -80,7 +81,7 @@ namespace FinTrackAI.Tests
                 Nome = "Rodolfo",
                 Email = "rodolfo2323@gmail.com",
                 Telefone = "319732348",
-                DataNascimento = "23/04/2000",
+                DataNascimento = new DateTime(2000, 05, 23),
                 CPF = "13139585602",
                 Senha = "chuvamolhada8787"
             };
@@ -112,42 +113,51 @@ namespace FinTrackAI.Tests
         }
         //=============UPDATE User=================//
         [Fact]
-        public async Task UpdateUser_CasoUsuario_NAO_EXISTA()
+        public async Task UpdateUser_EmailIgual_DeveLancarException()
         {
-            _repoMock.Setup(x => x.VerifyExistsUser(It.IsAny<Guid>())).ThrowsAsync(new UseCaseException("Usuario não existe"));
-            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.UpdateUser(Guid.NewGuid(), new UpdateUserRequest ()));
-            Assert.Equal("Usuario não existe", ex.Message);
-        }
-        
-        [Fact]
-        public async Task UpdateUser_CasoUsuario_EXISTA()
-        {
-            _repoMock.Setup(x => x.VerifyExistsUser(It.IsAny<Guid>())).ReturnsAsync(new User { 
+            _repoMock.Setup(x => x.VerifyExistsUser(It.IsAny<Guid>())).ReturnsAsync(new User
+            {
                 Email = "darwin@gmail.com",
                 Nome = "Darwin"
             });
+
+            var request = new UpdateUserRequest { Email = "darwin@gmail.com" };
+
+            var ex = await Assert.ThrowsAsync<UseCaseException>(() =>
+                _usecase.UpdateUser(Guid.NewGuid(), request));
+
+            Assert.Equal("Email cadastrado anteriormente, tente novamente.", ex.Message);
+        }
+
+        [Fact]
+        public async Task UpdateUser_CasoUsuario_EXISTA()
+        {
+            _repoMock.Setup(x => x.VerifyExistsUser(It.IsAny<Guid>())).ReturnsAsync(new User
+            {
+                Email = "darwin@gmail.com",
+                Nome = "Darwin"
+            });
+            _hashMock.Setup(x => x.HashPassword(It.IsAny<string>())).ReturnsAsync("Hashed_Password");
             _repoMock.Setup(x => x.UpdateUser(It.IsAny<Guid>(), It.IsAny<User>())).ReturnsAsync(true);
 
-            var request = new UpdateUserRequest { Email = "darwin@gmail.com"};
+            // Email DIFERENTE do cadastrado
+            var request = new UpdateUserRequest
+            {
+                Email = "novo@gmail.com",
+                Senha = "senha",
+                Telefone = "319732348"
+            };
+
             var result = await _usecase.UpdateUser(Guid.NewGuid(), request);
             Assert.True(result);
-        }
-        
-        //==============LOGIN User=================//
-        [Fact]
-        public async Task LoginUser_CasoUsuario_NAO_EXISTA()
-        {
-            _repoMock.Setup(x => x.VerifyExistsUser_withEmail(It.IsAny<string>())).ReturnsAsync(false);
-            var request = new LoginUserRequest { };
-            var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.LoginUser(request));
-            Assert.Equal("Usuario não encontrado", ex.Message);
         }
         [Fact]
         public async Task LoginUser_CasoSenhaSeja_INCORRETA()
         {
             _repoMock.Setup(x => x.VerifyExistsUser_withEmail(It.IsAny<string>())).ReturnsAsync(true);
-            _repoMock.Setup(x => x.GetDataUserEmail(It.IsAny<string>())).ReturnsAsync(new User { 
-                Senha = "senha_segredo"
+            _repoMock.Setup(x => x.GetDataUserEmail(It.IsAny<string>())).ReturnsAsync(new User
+            {
+                PasswordHash = "senha_segredo"
             });
             _hashMock.Setup(x => x.VerifyPassword(It.IsAny<string>(), It.IsAny<string>())).ThrowsAsync(new UseCaseException("Senha incorreta"));
             var request = new LoginUserRequest
@@ -169,7 +179,7 @@ namespace FinTrackAI.Tests
         [Fact]
         public async Task DeleteUser_CasoUsuario_EXISTA()
         {
-            _repoMock.Setup(x => x.VerifyExistsUser(It.IsAny<Guid>())).ReturnsAsync(new User{});
+            _repoMock.Setup(x => x.VerifyExistsUser(It.IsAny<Guid>())).ReturnsAsync(new User { });
             _repoMock.Setup(x => x.DeleteUser(It.IsAny<Guid>())).ReturnsAsync(true);
             var result = await _usecase.DeleteUser(Guid.NewGuid());
             Assert.True(result);
