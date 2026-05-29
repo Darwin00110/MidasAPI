@@ -42,7 +42,10 @@ public class AccountsRepository : IAccountsRepository
     {
         try
         {
-            var query = await _context.Accounts.Where(a => a.UserID == id).FirstOrDefaultAsync();
+            var query = await _context.Accounts
+                .Where(a => a.UserID == id)
+                .Include(a => a.User)
+                .FirstOrDefaultAsync();
             if (query == null)
             {
                 throw new RepositoryException("Conta não existe.");
@@ -65,6 +68,18 @@ public class AccountsRepository : IAccountsRepository
             }
             return true;
         } catch(Exception e)
+        {
+            throw new RepositoryException($"Repository Error: {e.Message}");
+        }
+    }
+    public async Task<Accounts> GetDataAccounts_WithKey(string CPF)
+    {
+        try
+        {
+            return await _context.Accounts.Where(a => a.ChavePix == CPF)
+            .Include(a => a.User)
+            .FirstOrDefaultAsync() ?? throw new RepositoryException("Conta não existe.");
+        }catch(Exception e)
         {
             throw new RepositoryException($"Repository Error: {e.Message}");
         }

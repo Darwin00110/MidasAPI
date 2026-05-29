@@ -8,22 +8,30 @@
         REJEITADA,
         CANCELADA
     }
+
     public enum OptionsTipoDaTransferencia
     {
-        Pix = 1,
-        Ted = 2,
-        Internal = 3,
-        External = 4
+        PIX,
+        TED,
+        DOC,
+        Deposito,
+        Saque,
+        Transferencia,
+        Estorno
     }
     public class Transacao
     {
         public Guid ID { get; set; }
         public Guid ContaOrigemId { get; set; }
         public Guid ContaDestinoId { get; set; }
+        public string? Nome_Origem { get; set; }
+        public string? Nome_Destino { get; set; }
+        public string ChavePix_ALVO { get; set; } = string.Empty;
         public decimal Valor { get; set; }
         public decimal Taxa { get; set; }
         public decimal ValorLiquido { get; set; }
-        public OptionsTipoDaTransferencia Tipo { get; set; }
+        public string? CPF { get; set; }
+        public OptionsTipoDaTransferencia? Tipo { get; set; }
         public OptionsStatusDaTransferencia Status { get; set; }
         public string Descricao { get; set; } = string.Empty;
         public string Protocolo { get; set; } = string.Empty;
@@ -33,8 +41,6 @@
         public DateTime? ConcluidoEm { get; set; }
         public DateTime? CanceladoEm { get; set; }
         public string? MotivoCancelamento { get; set; }
-        
-        // Navegação
         public Accounts? ContaOrigem { get; set; }
         public Accounts? ContaDestino { get; set; }
         private void Validate_ID()

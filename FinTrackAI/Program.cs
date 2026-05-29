@@ -69,8 +69,10 @@ var app = builder.Build();
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
+
     app.UseSwagger();
     app.UseSwaggerUI();
+    Open_Swagger.Open();
 }
 using (var scope = app.Services.CreateScope())
 {
@@ -79,14 +81,58 @@ using (var scope = app.Services.CreateScope())
 
     if (!context.Users.Any(u => u.Role == OptionsRole.ADMIN))
     {
-        var senhaHash = await hasher.HashPassword("amora0909!!!!");
-        context.Users.Add(new User
+        var senhaHash = await hasher.HashPassword("amora0909!");
+        var DataUser = new User
         {
-            Nome = "Isaque",
+            Nome = "Banco_FinTrackAI",
             Email = "Admin@gmail.com",
+            CPF = "15385638406",
             PasswordHash = senhaHash,
-            Role = OptionsRole.ADMIN
-        });
+            Role = OptionsRole.ADMIN,
+            DataNascimento = new DateTime(2008, 01, 30),
+            Status = OptionsStatus.ATIVO,
+            CreatedAt = DateTime.Now,
+            Telefone = "31-98765-3872"
+        };
+        var DataAccount = new Accounts
+        {
+          ChavePix = "00000000000",
+          User = DataUser,
+          Saldo = 1000000,
+          TipoConta = OptionsTipoDaConta.CONTA_SALARIO,
+          Status = OptionsStatus.ATIVO,
+          CriadoEm = DateTime.Now,
+        };
+        context.Users.Add(DataUser);
+        context.Accounts.Add(DataAccount);
+        await context.SaveChangesAsync();
+    }
+    if(!context.Users.Any(u => u.Role == OptionsRole.USER)){
+        var senhaHash_client = await hasher.HashPassword("amora0909!");
+        var DataUser_client = new User
+        {
+            Nome = "Cliente_FinTrackAI",
+            Email = "Cliente@gmail.com",
+            CPF = "15385638402",
+            PasswordHash = senhaHash_client,
+            Role = OptionsRole.USER,
+            DataNascimento = new DateTime(2008, 01, 30),
+            Status = OptionsStatus.ATIVO,
+            CreatedAt = DateTime.Now,
+            Telefone = "31-98765-3872"
+        };
+        var DataAccount_client = new Accounts
+        {
+          ChavePix = "11111111111",
+          User = DataUser_client,
+          NumeroAgencia = "0001",
+          Saldo = 100,
+          TipoConta = OptionsTipoDaConta.CONTA_SALARIO,
+          Status = OptionsStatus.ATIVO,
+          CriadoEm = DateTime.Now,
+        };
+        context.Users.Add(DataUser_client);
+        context.Accounts.Add(DataAccount_client);
         await context.SaveChangesAsync();
     }
 }

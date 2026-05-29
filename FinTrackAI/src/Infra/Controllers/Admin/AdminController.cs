@@ -228,4 +228,62 @@ public class AdminController : ControllerBase
             });
         }
     }
+
+    [Authorize(Roles = "ADMIN")]
+    [Authorize(Policy = "AtivoApenas")]
+    [HttpPatch("Account/{id}/block")]
+    public async Task<IActionResult> BloquearAcessoConta_Usuario(Guid id)
+    {
+        try
+        {
+            var result = await _adminUseCase.BlockAcessAccount(id);
+            if (!result)
+            {
+                return BadRequest(new
+                {
+                    error = "Conta não foi bloqueada, tente novamente mais tarde"
+                });
+            }
+            return Ok(new
+            {
+                sucess = "Conta bloqueada."
+            });
+        }
+        catch (Exception e)
+        {
+            return BadRequest(new
+            {
+                error = e.Message
+            });
+        }
+    }
+    [Authorize(Roles = "ADMIN")]
+    [Authorize(Policy = "AtivoApenas")]
+    [HttpPatch("Account/{id}/unlocked")]
+    public async Task<IActionResult> LiberarAcessoConta_Usuario(Guid id)
+    {
+        try
+        {
+            var result = await _adminUseCase.UnlockedAcessAccount(id);
+            if (!result)
+            {
+                return BadRequest(new
+                {
+                    error = "Conta não foi desbloqueada, tente novamente mais tarde"
+                });
+            }
+            return Ok(new
+            {
+                sucess = "Conta desbloqueada."
+            });
+        }
+        catch (Exception e)
+        {
+            return BadRequest(new
+            {
+                error = e.Message
+            });
+        }
+    }
+
 }

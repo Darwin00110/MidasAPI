@@ -15,6 +15,8 @@ public class UserUseCase_WithService : IUserUseCase_WithService
     public async Task<User> CreateUser_withCPF(CreateUserRequest_withCPF request)
     {
         var GetDataUser_cpf = await _validate_cpf.GetDataUser(request.CPF);
+        if (GetDataUser_cpf == null)
+            throw new UseCaseException("CPF invalido.");
         var DataUser = new User
         {
             ID = Guid.NewGuid(),

@@ -16,17 +16,15 @@ public class Accounts
     public Guid UserID { get; set; }
     public string NumeroConta { get; set; } = string.Empty;
     public string NumeroAgencia { get; set; } = string.Empty;
-    public string ChavePix { get; set; }
+    public required string ChavePix { get; set; }
     public decimal Saldo { get; set; }
     public OptionsTipoDaConta TipoConta { get; set; }
     public OptionsStatus Status { get; set; }
     public DateTime CriadoEm { get; set; }
-
     // Navegação
-    public User? User { get; set; }
+    public required User User { get; set; }
     public ICollection<Transacao> TransacoesEnviadas { get; set; } = new List<Transacao>();
     public ICollection<Transacao> TransacoesRecebidas { get; set; } = new List<Transacao>();
-
     public void Validate_Conta()
     {
         if (UserID == Guid.Empty)
@@ -39,5 +37,9 @@ public class Accounts
             throw new DomainException("Saldo não pode ser negativo.");
         if (!Enum.IsDefined(typeof(OptionsTipoDaConta), TipoConta))
             throw new DomainException("Tipo de conta inválido.");
+    }
+    public void Validate_TipoDaConta()
+    {
+
     }
 }

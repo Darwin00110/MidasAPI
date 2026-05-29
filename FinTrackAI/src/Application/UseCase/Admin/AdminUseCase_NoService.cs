@@ -5,13 +5,15 @@ namespace FinTrackAI;
 public class AdminUseCase_NoService : IAdminUseCase_NoService
 {
     private readonly IUserRepository _repo;
+    private readonly IAccountsRepository _accountsRepo;
     private readonly IHashService _hash;
     private readonly ITokenJWT _token;
-    public AdminUseCase_NoService(IUserRepository userRepository, IHashService hash, ITokenJWT token)
+    public AdminUseCase_NoService(IUserRepository userRepository, IHashService hash, ITokenJWT token, IAccountsRepository accountsRepository)
     {
         _repo = userRepository;
         _hash = hash;
         _token = token;
+        _accountsRepo = accountsRepository;
     }
     public async Task<User> CreateAdmin(CreateAdminRequest request)
     {
@@ -198,5 +200,34 @@ public class AdminUseCase_NoService : IAdminUseCase_NoService
         }
         var result = await _repo.ReadUser(id);
         return result;
+    }
+
+    public async Task<bool> BlockAcessAccount(Guid id)
+    {
+        var verifyAccountExists = await _accountsRepo.VerifyAccountExists(id);
+        if (!verifyAccountExists)
+        {
+            throw new UseCaseException("A Conta não existe.");
+        }
+        var GetDataAccount = await _accountsRepo.GetDataAccounts(id);
+        if(GetDataAccount.Status == OptionsStatus.DESATIVADO)
+        {
+            throw new UseCaseException("A Conta já esta bloqueada.");
+        }
+        return await _repo.BlockAcessAccount(id);
+    }
+    public async Task<bool> UnlockedAcessAccount(Guid id)
+    {
+        var verifyAccountExists = await _accountsRepo.VerifyAccountExists(id);
+        if (!verifyAccountExists)
+        {
+            throw new UseCaseException("A Conta não existe.");
+        }
+        var GetDataAccount = await _accountsRepo.GetDataAccounts(id);
+        if (GetDataAccount.Status == OptionsStatus.ATIVO)
+        {
+            throw new UseCaseException("A Conta já esta Desbloqueada.");
+        }
+        return await _repo.UnlockedAcessAccount(id);
     }
 }

@@ -3,6 +3,7 @@ using System;
 using FinTrackAI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinTrackAI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260526210827_Inicial01")]
+    partial class Inicial01
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -125,15 +128,8 @@ namespace FinTrackAI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("CPF")
-                        .HasColumnType("longtext");
-
                     b.Property<DateTime?>("CanceladoEm")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<string>("ChavePix_ALVO")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("ConcluidoEm")
                         .HasColumnType("datetime(6)");
@@ -154,18 +150,9 @@ namespace FinTrackAI.Migrations
                     b.Property<string>("MotivoCancelamento")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Nome_Destino")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Nome_Origem")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Protocolo")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<int>("Recebeu_Enviou")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("SaldoOrigemAntes")
                         .HasColumnType("decimal(65,30)");

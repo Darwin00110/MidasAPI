@@ -14,9 +14,12 @@ public interface IUserRepository
 
     public Task<List<GetAllUsersResponse>> GetAllUsers();
     public Task<User> GetDataUser(Guid id);
+    public Task<User> GetDataUserEmail(string email);
+    public Task<bool> PatchUpdateUser(Guid id, User user);
+
     public Task<bool> BlockAcessUser(Guid id);
     public Task<bool> UnlockedAcessUser(Guid id);
-    public Task<User> GetDataUserEmail(string email);
 
-    public Task<bool> PatchUpdateUser(Guid id, User user);
+    public Task<bool> BlockAcessAccount(Guid id);
+    public Task<bool> UnlockedAcessAccount(Guid id);
 }

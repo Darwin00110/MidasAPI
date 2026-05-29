@@ -4,13 +4,9 @@ namespace FinTrackAI;
 
 public interface ITransacaoRepository
 {
-    Task<Transacao> ExecutarTransferencia(
-        Transacao transferencia,
-        Accounts contaOrigem,
-        Accounts contaDestino,
-        decimal totalDebito);
-
-    Task<Transacao?> BuscarPorId(Guid id);
-    Task<Transacao?> BuscarPorProtocolo(string protocolo);
-    Task<List<Transacao>> ListarPorConta(Guid contaId);
+    public Task<TransferirResponse> Transferir(Transacao Data, Guid UserID);
+    public Task<DepositarResponse> Depositar(Transacao Data, Guid UserID);
+    public Task<decimal> Sacar(Transacao Data);
+    public Task<ExtratoResponse> Extrato(Guid UserID);
+    public Task<TransacaoExtratoDTO> ExtratoPorID(Guid transacaoID, Guid UserID);
 }

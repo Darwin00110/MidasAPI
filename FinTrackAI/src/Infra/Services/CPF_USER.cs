@@ -28,6 +28,8 @@ public class CPF_USER : ICPF_USER
             throw new ServiceException("Erro ao obter dados do CPF");
         }
         var result = await response.Content.ReadFromJsonAsync<CPFResponse_data>();
+        if(result == null)
+            throw new ServiceException("Erro ao obter dados do CPF");
         if (!result.Success)
         {
             throw new ServiceException("CPF invalido");
@@ -45,7 +47,7 @@ public class CPFResponse_valid
 public class CPFData
 {
     [JsonPropertyName("NOME")]
-    public string Nome { get; set; }
+    public required string Nome { get; set; }
     [JsonPropertyName("NASC")]
     public string? Data_nascimento { get; set; }
     [JsonPropertyName("CPF")]
@@ -61,5 +63,5 @@ public class CPFResponse_data
     [JsonPropertyName("success")]
     public bool Success { get; set; }
     [JsonPropertyName("data")]
-    public CPFData Data { get; set; }
+    public required CPFData Data { get; set; }
 }

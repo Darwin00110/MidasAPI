@@ -8,6 +8,7 @@ public class AdminUseCase_NoServiceTests
     private readonly Mock<IUserRepository> _repoMock;
     private readonly Mock<IHashService> _hashMock;
     private readonly Mock<ITokenJWT> _tokenMock;
+    private readonly Mock<IAccountsRepository> _repobank;
     private readonly AdminUseCase_NoService _usecase;
 
     public AdminUseCase_NoServiceTests()
@@ -15,7 +16,8 @@ public class AdminUseCase_NoServiceTests
         _repoMock = new Mock<IUserRepository>();
         _hashMock = new Mock<IHashService>();
         _tokenMock = new Mock<ITokenJWT>();
-        _usecase = new AdminUseCase_NoService(_repoMock.Object, _hashMock.Object, _tokenMock.Object);
+        _repobank = new Mock<IAccountsRepository>();
+        _usecase = new AdminUseCase_NoService(_repoMock.Object, _hashMock.Object, _tokenMock.Object, _repobank.Object);
     }
 
     [Fact]
@@ -446,4 +448,61 @@ public class AdminUseCase_NoServiceTests
         Assert.Equal("Rodolfo", result.Nome);
     }
 
+    [Fact]
+    public async Task BlockAcessAccount_Caso_ContaNaoExista_LancarException()
+    {
+        _repobank.Setup(x => x.VerifyAccountExists(It.IsAny<Guid>())).ReturnsAsync(false);
+        var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.BlockAcessAccount(Guid.NewGuid()));
+        Assert.Equal("A Conta não existe.", ex.Message);
+    }
+
+    [Fact]
+    public async Task BlockAcessAccount_Caso_ContaJaEstejaBloqueada_LancarException()
+    {
+        _repobank.Setup(x => x.VerifyAccountExists(It.IsAny<Guid>())).ReturnsAsync(true);
+        _repobank.Setup(x => x.GetDataAccounts(It.IsAny<Guid>())).ReturnsAsync(new Accounts
+        {
+            User = new User { },
+            ChavePix = "",
+            Status = OptionsStatus.DESATIVADO
+        });
+        var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.BlockAcessAccount(Guid.NewGuid()));
+        Assert.Equal("A Conta já esta bloqueada.", ex.Message);
+    }
+
+    [Fact]
+    public async Task BlockAcessAccount_Caso_TudoOK()
+    {
+        _repobank.Setup(x => x.VerifyAccountExists(It.IsAny<Guid>())).ReturnsAsync(true);
+        _repobank.Setup(x => x.GetDataAccounts(It.IsAny<Guid>())).ReturnsAsync(new Accounts
+        {
+            User = new User { },
+            ChavePix = "",
+            Status = OptionsStatus.ATIVO
+        });
+        _repoMock.Setup(x => x.BlockAcessAccount(It.IsAny<Guid>())).ReturnsAsync(true);
+        var result = await _usecase.BlockAcessAccount(Guid.NewGuid());
+        Assert.True(result);
+    }
+    [Fact]
+    public async Task UnlockedAcessAccount_Caso_ContaNaoExista_LancarException()
+    {
+        _repobank.Setup(x => x.VerifyAccountExists(It.IsAny<Guid>())).ReturnsAsync(false);
+        var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.UnlockedAcessAccount(Guid.NewGuid()));
+        Assert.Equal("A Conta não existe.", ex.Message);
+    }
+
+    [Fact]
+    public async Task UnlockedAcessAccount_Caso_ContaJaDesbloqueada_LancarException()
+    {
+        _repobank.Setup(x => x.VerifyAccountExists(It.IsAny<Guid>())).ReturnsAsync(true);
+        _repobank.Setup(x => x.GetDataAccounts(It.IsAny<Guid>())).ReturnsAsync(new Accounts
+        {
+            User = new User { },
+            ChavePix = "",
+            Status = OptionsStatus.ATIVO
+        });
+        var ex = await Assert.ThrowsAsync<UseCaseException>(() => _usecase.UnlockedAcessAccount(Guid.NewGuid()));
+        Assert.Equal("A Conta já esta Desbloqueada.", ex.Message);
+    }
 }

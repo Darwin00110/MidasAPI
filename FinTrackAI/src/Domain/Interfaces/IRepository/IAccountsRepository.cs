@@ -6,4 +6,5 @@ public interface IAccountsRepository
     public Task<string> GetSaldo(Guid id);
     public Task<Accounts> GetDataAccounts(Guid id);
     public Task<bool> VerifyAccountExists(Guid id);
+    public Task<Accounts> GetDataAccounts_WithKey(string CPF);
 }

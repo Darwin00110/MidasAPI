@@ -47,7 +47,7 @@ public class ApplicationDbContext : DbContext
                 .IsRequired();
             entity.Property(t => t.Status)
                 .HasConversion<string>()
-                .HasDefaultValue(OptionsStatusDaTransferencia.PENDENTE); // ✅ enum correto
+                .HasDefaultValue(OptionsStatusDaTransferencia.PENDENTE); 
             entity.Property(t => t.Valor)
                 .IsRequired();
             entity.Property(t => t.ValorLiquido)
@@ -81,7 +81,7 @@ public class ApplicationDbContext : DbContext
             entity.Property(a => a.Saldo)
                 .IsRequired();
             entity.Property(a => a.TipoConta)
-                .HasConversion<string>()  // ✅ faltava conversão
+                .HasConversion<string>()  
                 .IsRequired();
             entity.Property(a => a.Status)
                 .HasConversion<string>()
@@ -90,6 +90,9 @@ public class ApplicationDbContext : DbContext
             entity.Property(a => a.NumeroConta)
                 .IsRequired();
             entity.Property(a => a.NumeroAgencia)
+                .IsRequired();
+
+            entity.Property(a => a.ChavePix)
                 .IsRequired();
         });
     }

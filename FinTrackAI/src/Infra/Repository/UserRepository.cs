@@ -252,4 +252,41 @@ public class UserRepository : IUserRepository
             throw new RepositoryException($"Repository Error: {e.Message}");
         }
     }
+
+    public async Task<bool> BlockAcessAccount(Guid id)
+    {
+        try
+        {
+            var query = await _context.Accounts.Where(a => a.UserID == id).FirstOrDefaultAsync();
+            if(query == null)
+            {
+                return false;
+            }
+            query.Status = OptionsStatus.DESATIVADO;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            throw new RepositoryException($"Repository Error: {e.Message}");
+        }
+    }
+    public async Task<bool> UnlockedAcessAccount(Guid id)
+    {
+        try
+        {
+            var query = await _context.Accounts.Where(a => a.UserID == id).FirstOrDefaultAsync();
+            if (query == null)
+            {
+                return false;
+            }
+            query.Status = OptionsStatus.ATIVO;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            throw new RepositoryException($"Repository Error: {e.Message}");
+        }
+    }
 }
