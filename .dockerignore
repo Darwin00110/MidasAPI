@@ -2,4 +2,5 @@
 **/obj/
 **/node_modules/
 **/.git/
+**/.env
 **/appsettings.Development.json

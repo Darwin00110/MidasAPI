@@ -1,6 +1,7 @@
 using MidasAPI;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using MidasAPI.src.Application.UseCase;
 using MidasAPI.src.Domain.Interfaces.UserUseCase_NoService;
 using MidasAPI.src.Domain.Interfaces.IUserUseCase;
@@ -10,12 +11,33 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.RateLimiting;
 
-var builder = WebApplication.CreateBuilder(args);
-Env.Load();
+var envPath = FindEnvFile();
+if (envPath is not null)
+{
+    Env.Load(envPath);
+}
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
-));
+var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'DefaultConnection' is missing.");
+}
+
+var jwtSecret = builder.Configuration["Jwt:Secret"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+if (string.IsNullOrWhiteSpace(jwtSecret) ||
+    string.IsNullOrWhiteSpace(jwtIssuer) ||
+    string.IsNullOrWhiteSpace(jwtAudience))
+{
+    throw new InvalidOperationException("JWT configuration is missing.");
+}
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 0))));
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<ICPF_USER, CPF_USER>();
@@ -44,9 +66,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtSecret))
     };
 });
 builder.Services.AddRateLimiter(options =>
@@ -69,17 +91,18 @@ var app = builder.Build();
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-
+    app.UseHttpsRedirection();
     app.UseSwagger();
     app.UseSwaggerUI();
-    Open_Swagger.Open();
 }
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var hasher = scope.ServiceProvider.GetRequiredService<IHashService>();
 
-    if (!context.Users.Any(u => u.Role == OptionsRole.ADMIN))
+    await context.Database.MigrateAsync();
+
+    if (!await context.Users.AnyAsync(u => u.Role == OptionsRole.ADMIN))
     {
         var senhaHash = await hasher.HashPassword("amora0909!");
         var DataUser = new User
@@ -92,12 +115,14 @@ using (var scope = app.Services.CreateScope())
             DataNascimento = new DateTime(2008, 01, 30),
             Status = OptionsStatus.ATIVO,
             CreatedAt = DateTime.Now,
-            Telefone = "31-98765-3872"
+            Telefone = "31987653872"
         };
         var DataAccount = new Accounts
         {
             ChavePix = "00000000000",
             User = DataUser,
+            NumeroConta = "00000001",
+            NumeroAgencia = "0001",
             Saldo = 1000000,
             TipoConta = OptionsTipoDaConta.CONTA_SALARIO,
             Status = OptionsStatus.ATIVO,
@@ -107,7 +132,7 @@ using (var scope = app.Services.CreateScope())
         context.Accounts.Add(DataAccount);
         await context.SaveChangesAsync();
     }
-    if (!context.Users.Any(u => u.Role == OptionsRole.USER))
+    if (!await context.Users.AnyAsync(u => u.Role == OptionsRole.USER))
     {
         var senhaHash_client = await hasher.HashPassword("amora0909!");
         var DataUser_client = new User
@@ -120,12 +145,13 @@ using (var scope = app.Services.CreateScope())
             DataNascimento = new DateTime(2008, 01, 30),
             Status = OptionsStatus.ATIVO,
             CreatedAt = DateTime.Now,
-            Telefone = "31-98765-3872"
+            Telefone = "31987653872"
         };
         var DataAccount_client = new Accounts
         {
             ChavePix = "11111111111",
             User = DataUser_client,
+            NumeroConta = "00000002",
             NumeroAgencia = "0001",
             Saldo = 100,
             TipoConta = OptionsTipoDaConta.CONTA_SALARIO,
@@ -138,11 +164,31 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
+
+static string? FindEnvFile()
+{
+    var currentDirectory = Directory.GetCurrentDirectory();
+
+    while (true)
+    {
+        var candidate = Path.Combine(currentDirectory, ".env");
+        if (File.Exists(candidate))
+        {
+            return candidate;
+        }
+
+        var parent = Directory.GetParent(currentDirectory);
+        if (parent is null)
+        {
+            return null;
+        }
+
+        currentDirectory = parent.FullName;
+    }
+}
