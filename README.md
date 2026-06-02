@@ -1,4 +1,4 @@
-# FinTrackAI — API Financeira Bancária
+# MidasAPI — API Financeira Bancária
 
 API REST financeira desenvolvida com .NET 8 e ASP.NET Core,
 aplicando regras de domínio bancário reais.
@@ -31,8 +31,8 @@ src/
 ## ▶️ Como rodar
 
 ```bash
-git clone https://github.com/Darwin00110/FinTrackAI
-cd FinTrackAI
+git clone https://github.com/Darwin00110/MidasAPI
+cd MidasAPI
 docker-compose up
 ```
 

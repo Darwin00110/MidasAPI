@@ -1,21 +1,19 @@
-# ETAPA 1 — Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
 
-# Copia os dois .csproj
-COPY *.sln ./
-COPY FinTrackAI/*.csproj ./FinTrackAI/
-COPY FinTrackAI.Tests/*.csproj ./FinTrackAI.Tests/
-RUN dotnet restore
+WORKDIR /src
 
-# Copia o resto e compila
 COPY . .
-WORKDIR /app/FinTrackAI
+
+RUN dotnet restore
 RUN dotnet publish -c Release -o /app/publish
 
-# ETAPA 2 — Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+
 WORKDIR /app
+
 COPY --from=build /app/publish .
+
 EXPOSE 8080
-ENTRYPOINT ["dotnet", "FinTrackAI.dll"]
+
+ENTRYPOINT ["dotnet", "MidasAPI.dll"]
