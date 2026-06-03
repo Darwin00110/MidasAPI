@@ -29,7 +29,7 @@ public class User
 
     public OptionsRole Role { get; set; }
 
-    public OptionsStatus Status { get; set; }
+    public OptionsStatus? Status { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
