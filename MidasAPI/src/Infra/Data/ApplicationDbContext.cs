@@ -85,7 +85,6 @@ public class ApplicationDbContext : DbContext
                 .IsRequired();
             entity.Property(a => a.Status)
                 .HasConversion<string>()
-                .HasDefaultValue(OptionsStatus.ATIVO)
                 .IsRequired();
             entity.Property(a => a.NumeroConta)
                 .IsRequired();
