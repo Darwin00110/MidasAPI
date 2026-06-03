@@ -25,7 +25,8 @@ public class ApplicationDbContext : DbContext
                 .HasConversion<string>()
                 .HasDefaultValue(OptionsRole.USER);
             entity.Property(u => u.Status)
-                .HasConversion<string>();
+                .HasConversion<string>()
+                .HasDefaultValue(OptionsStatus.ATIVO);
             entity.Property(u => u.Nome)
                 .IsRequired();
             entity.Property(u => u.Email)
