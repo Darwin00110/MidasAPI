@@ -22,7 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrWhiteSpace(connectionString))
 {
-    throw new InvalidOperationException("Connection string 'ConnectionStrings__DefaultConnection' is missing.");
+    throw new InvalidOperationException("Connection string 'ConnectionStrings__DefaultConnection' is missing, verify logs");
 }
 
 var jwtSecret = builder.Configuration["Jwt:Secret"];
