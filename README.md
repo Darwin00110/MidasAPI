@@ -1,168 +1,163 @@
-# MidasAPI
+# Midas API
 
-MidasAPI é uma API bancária pensada para simular como um banco funciona por trás da tela. Ela separa clientes e administradores, organiza contas, processa transações e aplica regras de negócio de verdade.
+> API bancária REST desenvolvida em C# com ASP.NET Core, simulando operações reais de um sistema financeiro com foco em arquitetura limpa, segurança e testabilidade.
 
-Se você não é da área técnica, pense nela como um laboratório para entender como um sistema bancário sério é montado por dentro.
+[![.NET](https://img.shields.io/badge/.NET-8.0-purple)](https://dotnet.microsoft.com)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-O objetivo do projeto é mostrar como um sistema bancário pode ser estruturado de forma séria, com foco em manutenção, testes, organização por camadas e segurança.
+---
 
-## O que este projeto resolve
+## Sobre o projeto
 
-- Cadastro e autenticação de usuários e administradores.
-- Gestão de contas bancárias por cliente.
-- Transações financeiras com regras de negócio reais.
-- Bloqueio e desbloqueio de usuários e contas.
-- Consulta de saldo, dados cadastrais e extrato.
-- Segurança com JWT e separação por perfis.
+O Midas é uma API bancária que simula como um sistema financeiro funciona por trás da tela. Separa clientes e administradores, gerencia contas, processa transações PIX e aplica regras de negócio reais.
 
-## Como executar
+O objetivo não é apenas ter rotas funcionando — é demonstrar como um sistema bancário pode ser estruturado de forma séria, com foco em manutenção, testes, organização por camadas e segurança.
 
-### Link do Deploy
-```
+---
 
-```
-### Com Docker
+## Funcionalidades
 
-```bash
-docker compose up --build
-```
+**Usuários e autenticação**
+- Cadastro com CPF, e-mail, telefone e data de nascimento
+- Autenticação via JWT com claims de ID, role e status
+- Separação de perfis — USER e ADMIN
+- Bloqueio e desbloqueio de usuários e contas
 
-### Localmente
+**Contas bancárias**
+- Criação automática de conta ao cadastrar usuário
+- Consulta de saldo e dados cadastrais
+- Chave PIX vinculada à conta
 
-1. Crie um arquivo `.env` na raiz do projeto com as variáveis de ambiente.
-2. Garanta que o MySQL esteja rodando.
-3. Execute a API:
+**Transações**
+- Transferência PIX entre contas
+- Depósito na própria conta
+- Saque com validação de CPF
+- Extrato completo de transações enviadas e recebidas
+- Consulta de transação por ID
 
-```bash
-dotnet run --project MidasAPI/MidasAPI.csproj
-```
+**Segurança**
+- Autenticação JWT
+- Hash de senha com BCrypt
+- Rate Limiting — 100 requisições por minuto
+- Políticas de autorização por status da conta
 
-## Variáveis de ambiente
-
-O projeto lê as configurações sensíveis por `.env`, para evitar subir credenciais para o repositório.
-
-Exemplo de estrutura:
-
-```env
-ASPNETCORE_ENVIRONMENT=Development
-ConnectionStrings__DefaultConnection=Server=localhost;Port=3306;Database=MidasAPI;User=Client;Password=********
-Jwt__Secret=your-jwt-secret
-Jwt__Issuer=MidasAPI
-Jwt__Audience=MidasAPI-Client
-MYSQL_ROOT_PASSWORD=********
-MYSQL_DATABASE=MidasDb
-```
-
-## Arquitetura
-
-O projeto foi organizado com Clean Architecture, DDD, Repository Pattern e Inversão de Dependência.
-
-### Camadas
-
-- `Domain`: entidades, enums, exceções e contratos centrais do negócio.
-- `Application`: casos de uso e DTOs que orquestram as regras da aplicação.
-- `Infra`: implementação de persistência, serviços externos, controllers e integração com o banco.
-
-### Fluxo de dependência
-
-As dependências apontam para dentro:
-
-- O `Domain` não conhece MySQL, EF Core ou HTTP.
-- O `Application` usa interfaces para executar os casos de uso.
-- O `Infra` implementa os detalhes concretos, como banco, JWT, hash e controllers.
-
-Isso evita acoplamento excessivo e torna o projeto mais fácil de testar, manter e evoluir.
-
-## Por que Clean Architecture
-
-Usei Clean Architecture porque este projeto não quer ser apenas uma API com rotas. A ideia é simular um sistema bancário que continue organizado mesmo quando crescer.
-
-Na prática, isso traz alguns benefícios:
-
-- As regras de negócio ficam protegidas de mudanças no banco ou na interface HTTP.
-- Fica mais fácil trocar MySQL, ajustar controllers ou alterar serviços sem quebrar o domínio.
-- Os casos de uso ficam explícitos e mais próximos do que realmente acontece no banco.
-- Os testes ficam mais simples porque a lógica central depende de contratos, não de implementações concretas.
-
-## Por que DDD
-
-O projeto usa DDD para dar forma ao domínio bancário. Isso ajuda a tratar o sistema como um conjunto de regras e comportamentos, e não só como tabelas no banco.
-
-Aqui isso aparece principalmente em:
-
-- `User` e `Accounts` como entidades centrais.
-- `Transacao` como modelagem do processo financeiro.
-- Exceções de domínio e validações próximas das regras do negócio.
-- Separação clara entre perfis de usuário e administrador.
-
-## Por que Repository Pattern
-
-O Repository Pattern foi usado para isolar o acesso aos dados.
-
-Em vez de espalhar consultas pelo sistema inteiro:
-
-- O `Application` chama contratos de repositório.
-- O `Infra` conversa com o `DbContext`.
-- A regra de negócio não precisa saber como a persistência funciona por baixo.
-
-Isso melhora a leitura do código e facilita futuras mudanças de infraestrutura.
-
-## Por que EF Core
-
-O Entity Framework Core foi escolhido porque ele encaixa bem nesse tipo de projeto bancário em ASP.NET Core.
-
-Os principais motivos são:
-
-- Integração natural com ASP.NET Core 8.
-- Mapeamento das entidades para MySQL.
-- Migrations para controlar evolução do schema.
-- LINQ para consultas legíveis.
-- Suporte a async/await e tracking de entidades.
-- Boa combinação com Repository Pattern e Clean Architecture.
-
-No projeto, o EF Core fica concentrado na camada de infraestrutura, o que evita que o domínio fique preso a detalhes do banco.
-
-## Estrutura do projeto
-
-```text
-MidasAPI/
-|-- Program.cs
-|-- appsettings.json
-|-- appsettings.Development.json
-|-- Migrations/
-`-- src/
-    |-- Domain/
-    |-- Application/
-    `-- Infra/
-```
+---
 
 ## Tecnologias
 
-- .NET 8 / ASP.NET Core
-- Entity Framework Core
-- MySQL
-- JWT Authentication
-- Docker
-- xUnit
-- Moq
-- Swashbuckle / Swagger
+| Tecnologia | Uso |
+|---|---|
+| C# / ASP.NET Core 8 | Framework principal |
+| Entity Framework Core | ORM e migrations |
+| MySQL | Banco de dados |
+| JWT | Autenticação |
+| BCrypt | Hash de senhas |
+| Docker | Containerização |
+| xUnit + Moq | Testes unitários |
+| Swagger | Documentação |
 
-## Testes
+---
 
-O projeto possui uma suíte de testes em `MidasAPI.Tests`, cobrindo cenários de usuários, contas, transações e admin.
+## Arquitetura
 
-Para executar:
+O projeto foi organizado com **Clean Architecture**, **DDD**, **Repository Pattern** e **Inversão de Dependência**.MidasAPI/
+├── src/
+│   ├── Domain/          → entidades, enums, interfaces e exceções
+│   ├── Application/     → casos de uso e DTOs
+│   └── Infra/           → controllers, repositories, services, DbContext
+├── MidasAPI.Tests/      → testes unitários
+├── docker-compose.yml
+└── Program.cs
+
+**Fluxo de dependência:**
+Infra → Application → Domain
+
+O Domain não conhece MySQL, EF Core ou HTTP.
+O Application usa interfaces para orquestrar os casos de uso.
+O Infra implementa os detalhes concretos.
+
+---
+
+## Como executar
+
+### Com Docker (recomendado)
+
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/MidasAPI.git
+cd MidasAPI
+
+# Crie o arquivo .env na raiz
+cp .env.example .env
+
+# Suba os containers
+docker compose up --build
+```
+
+A API estará disponível em `http://localhost:5065/swagger`
+
+### Localmente
+
+```bash
+# Garanta que o MySQL esteja rodando
+# Configure o .env com suas credenciais
+dotnet run --project MidasAPI/MidasAPI.csproj
+```
+
+### Testes
 
 ```bash
 dotnet test
 ```
 
-## Observações
+---
 
-- O Swagger está habilitado em ambiente de desenvolvimento.
-- O container usa MySQL com migrations aplicadas no startup.
-- As credenciais sensíveis devem ficar apenas no `.env`.
+## Variáveis de ambiente
 
-## Contato
+Crie um arquivo `.env` na raiz do projeto:
 
-isaquesantos001100@gmail.com
+```env
+ASPNETCORE_ENVIRONMENT=Development
+ConnectionStrings__DefaultConnection=Server=localhost;Port=3306;Database=MidasAPI;User=root;Password=sua_senha
+Jwt__Secret=sua_chave_secreta_aqui
+Jwt__Issuer=MidasAPI
+Jwt__Audience=MidasAPI-Client
+MYSQL_ROOT_PASSWORD=sua_senha
+MYSQL_DATABASE=MidasDb
+```
+
+---
+
+## Endpoints principais
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | /user/register | Cadastro de usuário |
+| POST | /user/login | Login e geração de token |
+| GET | /accounts/data | Dados da conta autenticada |
+| POST | /transacao/transferir | Transferência PIX |
+| POST | /transacao/depositar | Depósito |
+| POST | /transacao/sacar | Saque |
+| GET | /transacao/extrato | Extrato completo |
+| GET | /transacao/extrato/{id} | Transação por ID |
+
+---
+
+## Decisões técnicas
+
+**Clean Architecture** — as regras de negócio ficam protegidas de mudanças no banco ou na interface HTTP. Fica mais fácil trocar MySQL, ajustar controllers ou alterar serviços sem quebrar o domínio.
+
+**DDD** — trata o sistema como um conjunto de regras e comportamentos, não apenas tabelas. User, Accounts e Transacao são entidades centrais com validações próximas das regras do negócio.
+
+**Repository Pattern** — isola o acesso aos dados. O Application chama contratos, o Infra conversa com o DbContext. A regra de negócio não sabe como a persistência funciona por baixo.
+
+**TDD** — testes escritos junto com a lógica, cobrindo cenários de usuários, contas, transações e admin com xUnit e Moq.
+
+---
+
+## Autor
+
+Desenvolvido por **Isaque Santos**
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Isaque%20Santos-blue)](https://linkedin.com/in/seu-perfil)
+[![Email](https://img.shields.io/badge/Email-isaquesantos001100%40gmail.com-red)](mailto:isaquesantos001100@gmail.com)
