@@ -27,7 +27,7 @@ public class User
 
     public DateTime DataNascimento { get; set; }
 
-    public OptionsRole Role { get; set; }
+    public OptionsRole Role { get; set; } = OptionsRole.USER;
 
     public OptionsStatus? Status { get; set; } = OptionsStatus.ATIVO;
 
