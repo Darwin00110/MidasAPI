@@ -19,10 +19,10 @@ if (envPath is not null)
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("ConnectionStrings__DefaultConnection=Server");
+var connectionString = builder.Configuration.GetConnectionString("ConnectionStrings__DefaultConnection");
 if (string.IsNullOrWhiteSpace(connectionString))
 {
-    throw new InvalidOperationException("Connection string 'DefaultConnection' is missing.");
+    throw new InvalidOperationException("Connection string 'ConnectionStrings__DefaultConnection' is missing.");
 }
 
 var jwtSecret = builder.Configuration["Jwt:Secret"];
