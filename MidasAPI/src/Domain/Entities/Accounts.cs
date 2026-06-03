@@ -19,7 +19,7 @@ public class Accounts
     public required string ChavePix { get; set; }
     public decimal Saldo { get; set; }
     public OptionsTipoDaConta TipoConta { get; set; }
-    public OptionsStatus Status { get; set; }
+    public OptionsStatus? Status { get; set; } = OptionsStatus.ATIVO;
     public DateTime CriadoEm { get; set; }
     // Navegação
     public required User User { get; set; }
