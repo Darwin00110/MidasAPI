@@ -61,16 +61,18 @@ O objetivo não é apenas ter rotas funcionando — é demonstrar como um sistem
 ## Arquitetura
 
 O projeto foi organizado com **Clean Architecture**, **DDD**, **Repository Pattern** e **Inversão de Dependência**
-
+```
 .MidasAPI/
 ├── src/
 │   ├── Domain/          → entidades, enums, interfaces e exceções
 │   ├── Application/     → casos de uso e DTOs
 │   └── Infra/           → controllers, repositories, services, DbContext
-├── MidasAPI.Tests/      → testes unitários
+|
 ├── docker-compose.yml
 └── Program.cs
+MidasAPI.Tests/      → testes unitários
 
+```
 **Fluxo de dependência:**
 Infra → Application → Domain
 
