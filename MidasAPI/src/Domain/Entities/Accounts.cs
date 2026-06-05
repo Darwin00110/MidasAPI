@@ -18,8 +18,8 @@ public class Accounts
     public string NumeroAgencia { get; set; } = string.Empty;
     public required string ChavePix { get; set; }
     public decimal Saldo { get; set; }
-    public OptionsTipoDaConta? TipoConta { get; set; } = OptionsTipoDaConta.CONTA_SALARIO;
-    public OptionsStatus? Status { get; set; } = OptionsStatus.ATIVO;
+    public OptionsTipoDaConta TipoConta { get; set; }
+    public OptionsStatus Status { get; set; }
     public DateTime CriadoEm { get; set; }
     // Navegação
     public required User User { get; set; }

@@ -22,11 +22,9 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasKey(u => u.ID);
             entity.Property(u => u.Role)
-                .HasConversion<string>()
-                .HasDefaultValue(OptionsRole.USER);
+                .HasConversion<string>();
             entity.Property(u => u.Status)
-                .HasConversion<string>()
-                .HasDefaultValue(OptionsStatus.ATIVO);
+                .HasConversion<string>();
             entity.Property(u => u.Nome)
                 .IsRequired();
             entity.Property(u => u.Email)
@@ -46,8 +44,7 @@ public class ApplicationDbContext : DbContext
                 .HasConversion<string>()
                 .IsRequired();
             entity.Property(t => t.Status)
-                .HasConversion<string>()
-                .HasDefaultValue(OptionsStatusDaTransferencia.PENDENTE);
+                .HasConversion<string>();
             entity.Property(t => t.Valor)
                 .IsRequired();
             entity.Property(t => t.ValorLiquido)
