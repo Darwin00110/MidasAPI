@@ -98,7 +98,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-A API estará disponível em `http://localhost:5065/swagger`
+A API estará disponível em `https://midasapi-o6ht.onrender.com`
 
 ### Localmente
 
@@ -134,17 +134,10 @@ MYSQL_DATABASE=MidasDb
 
 ## Endpoints principais
 
-| Método | Rota | Descrição |
-|---|---|---|
-| POST | /user/register | Cadastro de usuário |
-| POST | /user/login | Login e geração de token |
-| GET | /accounts/data | Dados da conta autenticada |
-| POST | /transacao/transferir | Transferência PIX |
-| POST | /transacao/depositar | Depósito |
-| POST | /transacao/sacar | Saque |
-| GET | /transacao/extrato | Extrato completo |
-| GET | /transacao/extrato/{id} | Transação por ID |
-
+### Swagger
+```
+https://midasapi-o6ht.onrender.com/swagger/index.html
+```
 ---
 
 ## Decisões técnicas
