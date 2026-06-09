@@ -60,7 +60,7 @@ O objetivo não é apenas ter rotas funcionando — é demonstrar como um sistem
 
 ## Arquitetura
 
-O projeto foi organizado com **Clean Architecture**, **DDD**, **Repository Pattern** e **Inversão de Dependência**
+O projeto foi organizado com **Clean Architecture**, **Inspiração em DDD**, **Repository Pattern** e **Inversão de Dependência**
 ```
 .MidasAPI/
 ├── src/
