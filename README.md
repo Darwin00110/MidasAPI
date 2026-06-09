@@ -128,7 +128,7 @@ https://midasapi-o6ht.onrender.com/swagger/index.html
 
 **Clean Architecture** — as regras de negócio ficam protegidas de mudanças no banco ou na interface HTTP. Fica mais fácil trocar MySQL, ajustar controllers ou alterar serviços sem quebrar o domínio.
 
-**DDD** — trata o sistema como um conjunto de regras e comportamentos, não apenas tabelas. User, Accounts e Transacao são entidades centrais com validações próximas das regras do negócio.
+**Inspiração em DDD** — trata o sistema como um conjunto de regras e comportamentos, não apenas tabelas. User, Accounts e Transacao são entidades centrais com validações próximas das regras do negócio.
 
 **Repository Pattern** — isola o acesso aos dados. O Application chama contratos, o Infra conversa com o DbContext. A regra de negócio não sabe como a persistência funciona por baixo.
 
