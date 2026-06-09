@@ -18,6 +18,8 @@
   https://midasapi-o6ht.onrender.com/swagger/index.html
 ```
 
+---
+
 🔐 Usuário de teste:
 ´´´
 Email: Cliente@gmail.com
