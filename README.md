@@ -21,16 +21,16 @@
 ---
 
 🔐 Usuário de teste:
-´´´
+```
 Email: Cliente@gmail.com
 Senha: amora0909!
-´´´
+```
 
 👑 Admin de teste:
-´´´
+```
 Email: Admin@gmail.com
 Senha: amora0909!
-´´´
+```
 obs: (As duas possuem contas proprias a do 'Admin' esta simulando um 'banco' que tem uma 
 enorme quantia de dinheiro perfeito para verificar o sistema na pratica)
 
