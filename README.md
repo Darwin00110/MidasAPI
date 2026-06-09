@@ -116,22 +116,6 @@ dotnet test
 
 ---
 
-## Variáveis de ambiente
-
-Crie um arquivo `.env` na raiz do projeto:
-
-```env
-ASPNETCORE_ENVIRONMENT=Development
-ConnectionStrings__DefaultConnection=Server=localhost;Port=3306;Database=MidasAPI;User=root;Password=sua_senha
-Jwt__Secret=sua_chave_secreta_aqui
-Jwt__Issuer=MidasAPI
-Jwt__Audience=MidasAPI-Client
-MYSQL_ROOT_PASSWORD=sua_senha
-MYSQL_DATABASE=MidasDb
-```
-
----
-
 ## Endpoints principais
 
 ### Swagger
