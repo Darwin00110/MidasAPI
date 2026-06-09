@@ -117,7 +117,7 @@ O Infra implementa os detalhes concretos.
 
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/MidasAPI.git
+git clone https://github.com/Darwin00110/MidasAPI.git
 cd MidasAPI
 
 # Crie o arquivo .env na raiz
@@ -143,14 +143,6 @@ dotnet test
 
 ---
 
-## Endpoints principais
-
-### Swagger
-```
-https://midasapi-o6ht.onrender.com/swagger/index.html
-```
----
-
 ## Decisões técnicas
 
 **Clean Architecture** — as regras de negócio ficam protegidas de mudanças no banco ou na interface HTTP. Fica mais fácil trocar MySQL, ajustar controllers ou alterar serviços sem quebrar o domínio.
@@ -173,5 +165,5 @@ https://midasapi-o6ht.onrender.com/swagger/index.html
 
 Desenvolvido por **Isaque Santos**
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Isaque%20Santos-blue)](https://linkedin.com/in/seu-perfil)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Isaque%20Santos-blue)](https://www.linkedin.com/in/isaque-santos39/)
 [![Email](https://img.shields.io/badge/Email-isaquesantos001100%40gmail.com-red)](mailto:isaquesantos001100@gmail.com)
