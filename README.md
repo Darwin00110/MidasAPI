@@ -135,6 +135,10 @@ https://midasapi-o6ht.onrender.com/swagger/index.html
 **TDD** — testes escritos junto com a lógica, cobrindo cenários de usuários, contas, transações e admin com xUnit e Moq.
 
 ---
+## Imagens
+```
+<img width="609" height="644" alt="Midas SWAGGER" src="https://github.com/user-attachments/assets/a1387d84-2482-4737-b42a-55c487859d9b" />
+```
 
 ## Autor
 
