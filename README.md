@@ -156,7 +156,7 @@ dotnet test
 ---
 ## Imagens
 
-<p align="center">
+<p>
   <img width="609" height="600" alt="Midas SWAGGER" src="https://github.com/user-attachments/assets/a1387d84-2482-4737-b42a-55c487859d9b" />
   <img width="609" height="567" alt="Grafico Clean architecture" src="https://github.com/user-attachments/assets/37150142-b403-4b23-84a1-faa2312498af" />
 </p>
