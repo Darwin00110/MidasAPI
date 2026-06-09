@@ -137,7 +137,7 @@ https://midasapi-o6ht.onrender.com/swagger/index.html
 ---
 ## Imagens
 <p align="center">
-  <img width="609" height="500" alt="Midas SWAGGER" src="https://github.com/user-attachments/assets/a1387d84-2482-4737-b42a-55c487859d9b" />
+  <img width="609" height="600" alt="Midas SWAGGER" src="https://github.com/user-attachments/assets/a1387d84-2482-4737-b42a-55c487859d9b" />
 </p>
 
 ---
