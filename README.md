@@ -7,6 +7,30 @@
 
 ---
 
+## Demonstração
+
+🚀 API Online:
+```
+  https://midasapi-o6ht.onrender.com
+```
+📖 Swagger:
+```
+  https://midasapi-o6ht.onrender.com/swagger/index.html
+```
+
+🔐 Usuário de teste:
+Email: Cliente@gmail.com
+Senha: amora0909!
+
+👑 Admin de teste:
+Email: Admin@gmail.com
+Senha: amora0909!
+
+obs: (As duas possuem contas proprias a do 'Admin' esta simulando um 'banco' que tem uma 
+enorme quantia de dinheiro perfeito para verificar o sistema na pratica)
+
+---
+
 ## Sobre o projeto
 
 O Midas é uma API bancária que simula como um sistema financeiro funciona por trás da tela. Separa clientes e administradores, gerencia contas, processa transações PIX e aplica regras de negócio reais.
@@ -97,8 +121,6 @@ cp .env.example .env
 # Suba os containers
 docker compose up --build
 ```
-
-A API estará disponível em `https://midasapi-o6ht.onrender.com`
 
 ### Localmente
 
